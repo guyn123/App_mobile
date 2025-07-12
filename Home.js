@@ -110,7 +110,8 @@ export default function HomeS() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ backgroundColor: '#28a745', padding: 10, borderRadius: 6, flex: 1 }}
-                    onPress={() => navigation.navigate('EventDetail', { event })}>
+                    onPress={() => navigation.navigate('DKEvent', { id: event.id })}
+>
                     <Text style={{ color: '#fff', textAlign: 'center' }}>Đăng ký</Text>
                   </TouchableOpacity>
                 </View>
@@ -150,6 +151,8 @@ const FeatureItem = ({ image, title, desc }) => (
     <Text style={styles.featureDesc}>{desc}</Text>
   </View>
 );
+
+
 
 const SpeakerCard = ({ image, name, title }) => (
   <View style={styles.speakerCard}>

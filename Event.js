@@ -165,9 +165,13 @@ export default function EventE() {
                                         >
                                             <Text style={styles.buttonText}>Chi tiết</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={styles.registerButton}>
-                                            <Text style={styles.buttonText}>Đăng ký</Text>
-                                        </TouchableOpacity>
+                                        <TouchableOpacity 
+  style={styles.registerButton}
+  onPress={() => navigation.navigate('DKEvent', { id: item.id })}
+>
+  <Text style={styles.buttonText}>Đăng ký</Text>
+</TouchableOpacity>
+
                                     </View>
                                 </View>
                             </View>

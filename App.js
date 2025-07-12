@@ -12,6 +12,7 @@ import ContactCC from './Contact';
 import ProfilePP from './Profile';
 import AccountA from './Account'; // 👈 Màn hình đăng nhập
 import EventDetail from './EventDetail'; // 👈 Thêm màn hình chi tiết sự kiện
+import DKEvent from './DKEvent'; // 👈 Thêm màn hình đăng ký
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -66,8 +67,10 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Quaylai" component={QuayLai} />
         <Stack.Screen name="Account" component={AccountA} />
-        <Stack.Screen name="EventDetail" component={EventDetail}options={{ headerShown: true, title: 'Chi tiết sự kiện' }}
-        />
+        <Stack.Screen name="EventDetail" component={EventDetail}options={{ headerShown: true, title: 'Chi tiết sự kiện' }}/>
+        <Stack.Screen name="DKEvent" component={DKEvent} options={{ headerShown: true, title: 'Đăng ký sự kiện' }} // 👈 Tiêu đề màn hình
+/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );
