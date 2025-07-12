@@ -5,7 +5,6 @@ import {
     Dimensions,
     FlatList,
     Image,
-    ImageSourcePropType,
     Modal,
     SafeAreaView,
     ScrollView,
@@ -15,234 +14,170 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-// Màn hình Trang chủ
 export default function EventE() {
+    const navigation = useNavigation();
     const [selectedImage, setSelectedImage] = useState(null);
-
-    //Lọc theo thành phố
-const [isCityModalVisible, setCityModalVisible] = useState(false);
-const [selectedCityLabel, setSelectedCityLabel] = useState('Tất cả');
-//--------------
-    
+    const [isCityModalVisible, setCityModalVisible] = useState(false);
+    const [selectedCityLabel, setSelectedCityLabel] = useState('Tất cả');
     const [selectedCategory, setSelectedCategory] = useState('all');
-const [maxPrice, setMaxPrice] = useState(5000000);
-const [selectedCity, setSelectedCity] = useState('all');
+    const [maxPrice, setMaxPrice] = useState(5000000);
+    const [selectedCity, setSelectedCity] = useState('all');
 
-const filteredEvents = eventList.filter((event) => {
-  const cityMatch = selectedCity === 'all' || event.location.includes(selectedCity);
-  const categoryMatch = selectedCategory === 'all' || event.category === selectedCategory;
-  const priceMatch = parseInt(event.price) <= maxPrice;
-  return cityMatch && categoryMatch && priceMatch;
-});
+    const filteredEvents = eventList.filter((event) => {
+        const cityMatch = selectedCity === 'all' || event.location.includes(selectedCity);
+        const categoryMatch = selectedCategory === 'all' || event.category === selectedCategory;
+        const priceMatch = parseInt(event.price) <= maxPrice;
+        return cityMatch && categoryMatch && priceMatch;
+    });
 
-const screenWidth = Dimensions.get('window').width;
-const itemWidth = (screenWidth - 48) / 2;
+    const cityList = [
+        { label: 'Tất cả', value: 'all' },
+        { label: 'Hà Nội', value: 'Hà Nội' },
+        { label: 'TP.HCM', value: 'TP.HCM' },
+        { label: 'Đà Nẵng', value: 'Đà Nẵng' },
+        { label: 'Huế', value: 'Huế' },
+    ];
 
-const cityList = [
-  { label: 'Tất cả', value: 'all' },
-  { label: 'Hà Nội', value: 'Hà Nội' },
-  { label: 'TP.HCM', value: 'TP.HCM' },
-  { label: 'Đà Nẵng', value: 'Đà Nẵng' },
-  { label: 'Huế', value: 'Huế' },
-];
+    return (
+        <SafeAreaView style={styles.safeArea}>
+            <ScrollView>
+                <View style={styles.header}>
+                    <Image
+                        source={require('./assets/img/banners/original.png')}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Tìm kiếm sự kiện..."
+                        placeholderTextColor="#666"
+                    />
+                    <View style={styles.searchButton}>
+                        <Text style={styles.searchButtonText}>Tìm</Text>
+                    </View>
+                </View>
 
+                <ScrollView horizontal pagingEnabled style={styles.slider}>
+                    <Image
+                        source={require('./assets/img/1-van-lang-17030396662872128757935.jpg')}
+                        style={styles.sliderImage}
+                    />
+                </ScrollView>
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
-        {/* Header */}
-        <View style={styles.header}>
-          <Image
-            source={require('./assets/img/banners/original.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm kiếm sự kiện..."
-            placeholderTextColor="#666"
-          />
-          <View style={styles.searchButton}>
-            <Text style={styles.searchButtonText}>Tìm</Text>
-          </View>
-        </View>
+                <View style={styles.section}>
+                    <Text style={styles.filterTitle}>Danh mục:</Text>
+                    <View style={styles.categoryList}>
+                        {['all', 'music', 'tech', 'education', 'festival'].map((cat) => (
+                            <TouchableOpacity
+                                key={cat}
+                                style={[styles.categoryButton, selectedCategory === cat && styles.categoryButtonActive]}
+                                onPress={() => setSelectedCategory(cat)}
+                            >
+                                <Text style={[styles.categoryText, selectedCategory === cat && styles.categoryTextActive]}>
+                                    {cat === 'all' ? 'Tất cả' :
+                                        cat === 'music' ? 'Âm nhạc' :
+                                        cat === 'tech' ? 'Công nghệ' :
+                                        cat === 'education' ? 'Giáo dục' : 'Lễ hội'}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
 
-        {/* Slider */}
-        <ScrollView horizontal pagingEnabled style={styles.slider}>
-          <Image
-            source={require('./assets/img/1-van-lang-17030396662872128757935.jpg')}
-            style={styles.sliderImage}
-          />
-        </ScrollView>
-        <View style={styles.section}>
-  
+                    <Text style={styles.filterTitle}>Lọc theo giá:</Text>
+                    <Slider
+                        style={{ width: '100%', height: 40 }}
+                        minimumValue={0}
+                        maximumValue={5000000}
+                        step={50000}
+                        value={maxPrice}
+                        onValueChange={(value) => setMaxPrice(value)}
+                    />
+                    <Text>Giá tối đa: {maxPrice.toLocaleString()}₫</Text>
 
-  {/* DANH MỤC */}
-  <Text style={styles.filterTitle}>Danh mục:</Text>
-  <View style={styles.categoryList}>
-    {['all', 'music', 'tech', 'education', 'festival'].map((cat) => (
-      <TouchableOpacity
-        key={cat}
-        style={[
-          styles.categoryButton,
-          selectedCategory === cat && styles.categoryButtonActive,
-        ]}
-        onPress={() => setSelectedCategory(cat)}
-      >
-       <Text style={[styles.categoryText, selectedCategory === cat && styles.categoryTextActive]}>
-  {cat === 'all'
-    ? 'Tất cả'
-    : cat === 'music'
-    ? 'Âm nhạc'
-    : cat === 'tech'
-    ? 'Công nghệ'
-    : cat === 'education'
-    ? 'Giáo dục'
-    : 'Lễ hội'}
-</Text>
+                    <Text style={styles.filterTitle}>Lọc theo thành phố:</Text>
+                    <TouchableOpacity style={styles.dropdownButton} onPress={() => setCityModalVisible(true)}>
+                        <Text style={styles.dropdownText}>{selectedCityLabel}</Text>
+                    </TouchableOpacity>
 
-      </TouchableOpacity>
-    ))}
-  </View>
+                    <Modal visible={isCityModalVisible} transparent animationType="fade" onRequestClose={() => setCityModalVisible(false)}>
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.modalBox}>
+                                {cityList.map((city) => (
+                                    <TouchableOpacity
+                                        key={city.value}
+                                        style={styles.modalItem}
+                                        onPress={() => {
+                                            setSelectedCity(city.value);
+                                            setSelectedCityLabel(city.label);
+                                            setCityModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={styles.modalItemText}>{city.label}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+                    </Modal>
 
-  {/* GIÁ */}
-  <Text style={styles.filterTitle}>Lọc theo giá:</Text>
-  <Slider
-  style={{ width: '100%', height: 40 }}
-  minimumValue={0}
-  maximumValue={5000000}
-  step={50000}
-  value={maxPrice}
-  onValueChange={(value) => setMaxPrice(value)}
-/>
-<Text>Giá tối đa: {maxPrice.toLocaleString()}₫</Text>
+                    <Modal
+                        visible={!!selectedImage}
+                        transparent
+                        animationType="fade"
+                        onRequestClose={() => setSelectedImage(null)}
+                    >
+                        <TouchableOpacity style={styles.imageModalOverlay} activeOpacity={1} onPressOut={() => setSelectedImage(null)}>
+                            <View style={styles.imageModalBox}>
+                                {selectedImage && (
+                                    <Image source={selectedImage} style={styles.imageModalImage} resizeMode="contain" />
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    </Modal>
+                </View>
 
-
-  <Text style={styles.filterTitle}>Lọc theo thành phố:</Text>
-<TouchableOpacity
-  style={styles.dropdownButton}
-  onPress={() => setCityModalVisible(true)}
->
-  <Text style={styles.dropdownText}>{selectedCityLabel}</Text>
-</TouchableOpacity>
-
-{/* Modal chọn thành phố */}
-<Modal
-  visible={isCityModalVisible}
-  transparent
-  animationType="fade"
-  onRequestClose={() => setCityModalVisible(false)}
->
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalBox}>
-      {cityList.map((city) => (
-        <TouchableOpacity
-          key={city.value}
-          style={styles.modalItem}
-          onPress={() => {
-            setSelectedCity(city.value);
-            setSelectedCityLabel(city.label);
-            setCityModalVisible(false);
-          }}
-        >
-          <Text style={styles.modalItemText}>{city.label}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  </View>
-</Modal>
-
-<Modal
-  visible={!!selectedImage}
-  transparent
-  animationType="fade"
-  onRequestClose={() => setSelectedImage(null)}
->
-  <TouchableOpacity
-    style={styles.imageModalOverlay}
-    activeOpacity={1}
-    onPressOut={() => setSelectedImage(null)}
-  >
-    <View style={styles.imageModalBox}>
-      {selectedImage && (
-        <Image source={selectedImage} style={styles.imageModalImage} resizeMode="contain" />
-      )}
-    </View>
-  </TouchableOpacity>
-</Modal>
-
-
-</View>
-
-<View style={styles.section}>
- 
-  <FlatList
-    data={filteredEvents}
-    keyExtractor={(item) => item.id.toString()}
-    numColumns={2}
-    scrollEnabled={false}
-    contentContainerStyle={styles.eventList}
-    columnWrapperStyle={{ justifyContent: 'space-between' }}
-    renderItem={({ item }) => (
-      <View style={styles.card}>
-        <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
-  <Image source={item.image} style={styles.eventImage} />
-</TouchableOpacity>
-
-        <View style={styles.cardContent}>
-          <Text style={styles.eventTime}>🕒 {new Date(item.start).toLocaleString('vi-VN')}</Text>
-          <Text style={styles.eventTime}>🕒 {new Date(item.end).toLocaleString('vi-VN')}</Text>
-          <Text style={styles.eventTitle}>{item.title}</Text>
-          <Text style={styles.eventLocation}>📍 {item.location}</Text>
-          <Text style={styles.eventPrice}>
-            {parseInt(item.price) > 0 ? parseInt(item.price).toLocaleString() + '₫' : '0₫'}
-          </Text>
-          <View style={styles.eventButtons}>
-            <TouchableOpacity style={styles.detailButton}>
-              <Text style={styles.buttonText}>Chi tiết</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.registerButton}>
-              <Text style={styles.buttonText}>Đăng ký</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    )}
-  />
-</View>
-</ScrollView>    
-</SafeAreaView>
-    
-  );
-  
-};
-
-
-
-
-// Feature component
-
-
-const FeatureItem = ({ image, title, desc }) => (
-  <View style={styles.featureItem}>
-    <Image source={image} style={styles.featureIcon} />
-    <Text style={styles.featureTitle}>{title}</Text>
-    <Text style={styles.featureDesc}>{desc}</Text>
-  </View>
-);
-
-// Speaker component
-
-
-const SpeakerCard = ({ image, name, title }) => (
-  <View style={styles.speakerCard}>
-    <Image source={image} style={styles.speakerImage} />
-    <Text style={styles.speakerName}>{name}</Text>
-    <Text style={styles.speakerTitle}>{title}</Text>
-  </View>
-);
-
+                <View style={styles.section}>
+                    <FlatList
+                        data={filteredEvents}
+                        keyExtractor={(item) => item.id.toString()}
+                        numColumns={2}
+                        scrollEnabled={false}
+                        contentContainerStyle={styles.eventList}
+                        columnWrapperStyle={{ justifyContent: 'space-between' }}
+                        renderItem={({ item }) => (
+                            <View style={styles.card}>
+                                <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
+                                    <Image source={item.image} style={styles.eventImage} />
+                                </TouchableOpacity>
+                                <View style={styles.cardContent}>
+                                    <Text style={styles.eventTime}>🕒 {new Date(item.start).toLocaleString('vi-VN')}</Text>
+                                    <Text style={styles.eventTime}>🕒 {new Date(item.end).toLocaleString('vi-VN')}</Text>
+                                    <Text style={styles.eventTitle}>{item.title}</Text>
+                                    <Text style={styles.eventLocation}>📍 {item.location}</Text>
+                                    <Text style={styles.eventPrice}>
+                                        {parseInt(item.price) > 0 ? parseInt(item.price).toLocaleString() + '₫' : '0₫'}
+                                    </Text>
+                                    <View style={styles.eventButtons}>
+                                        <TouchableOpacity
+                                            style={styles.detailButton}
+                                            onPress={() => navigation.navigate('EventDetail', { event: item })}
+                                        >
+                                            <Text style={styles.buttonText}>Chi tiết</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={styles.registerButton}>
+                                            <Text style={styles.buttonText}>Đăng ký</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        )}
+                    />
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    );
+}
 
 
 

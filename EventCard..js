@@ -1,7 +1,12 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const EventCard = ({ title, image, start, end, location, price }) => {
+const EventCard = ({ title, image, start, end, location, price, description }) => {
+  const navigation = useNavigation();
+
+  const eventData = { title, image, start, end, location, price, description };
+
   return (
     <View style={styles.card}>
       <Image source={image} style={styles.image} />
@@ -14,8 +19,11 @@ const EventCard = ({ title, image, start, end, location, price }) => {
           {parseInt(price) > 0 ? `${parseInt(price).toLocaleString()}₫` : '0₫'}
         </Text>
         <View style={styles.buttons}>
-          <TouchableOpacity style={styles.detailButton}>
-            <Text style={styles.buttonText}>Xem chi tiết</Text>
+          <TouchableOpacity
+            style={styles.detailButton}
+            onPress={() => navigation.navigate('EventDetail', { event: eventData })}
+          >
+            <Text style={styles.buttonText}>Chi tiết</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.registerButton}>
             <Text style={styles.buttonText}>Đăng ký</Text>

@@ -10,13 +10,14 @@ import EventE from './Event';
 import AboutA from './About';
 import ContactCC from './Contact';
 import ProfilePP from './Profile';
-import AccountA from './Account'; // 👈 import màn hình đăng nhập
+import AccountA from './Account'; // 👈 Màn hình đăng nhập
+import EventDetail from './EventDetail'; // 👈 Thêm màn hình chi tiết sự kiện
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// Tab chính
-function MainTabs() {
+// Bottom Tabs chính
+function QuayLai() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -63,8 +64,10 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="MainTabs" component={MainTabs} />
+        <Stack.Screen name="Quaylai" component={QuayLai} />
         <Stack.Screen name="Account" component={AccountA} />
+        <Stack.Screen name="EventDetail" component={EventDetail}options={{ headerShown: true, title: 'Chi tiết sự kiện' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

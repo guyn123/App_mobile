@@ -1,24 +1,25 @@
 import { eventList } from './src/data/eventData';
 import React, { useState } from 'react';
 import {
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Dimensions
 } from 'react-native';
-import EventCard from './EventCard.';
+import { useNavigation } from '@react-navigation/native';
 
-// Màn hình Trang chủ
 export default function HomeS() {
+  const navigation = useNavigation();
+  const screenWidth = Dimensions.get('window').width;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
-        {/* Header */}
         <View style={styles.header}>
           <Image
             source={require('./assets/img/banners/original.png')}
@@ -35,7 +36,6 @@ export default function HomeS() {
           </View>
         </View>
 
-        {/* Slider */}
         <ScrollView horizontal pagingEnabled style={styles.slider}>
           <Image
             source={require('./assets/img/nghien-cuu-khoa-hoc-sinh-vien-truong-dai-hoc-cmc-19.jpg')}
@@ -43,7 +43,6 @@ export default function HomeS() {
           />
         </ScrollView>
 
-        {/* Features */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tại sao chọn chúng tôi?</Text>
           <View style={styles.featuresContainer}>
@@ -70,30 +69,13 @@ export default function HomeS() {
           </View>
         </View>
 
-        {/* Speakers */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>MỘT SỐ DIỄN GIẢ ĐÁNG CHÚ Ý</Text>
           <ScrollView horizontal>
-            <SpeakerCard
-              image={require('./assets/img/timcook.jpg')}
-              name="Tim Cook"
-              title="CEO của Apple"
-            />
-            <SpeakerCard
-              image={require('./assets/img/USAFA_Hosts_Elon_Musk.jpg')}
-              name="Elon Musk"
-              title="CEO Tesla & SpaceX"
-            />
-            <SpeakerCard
-              image={require('./assets/img/putin.jpg')}
-              name="Putin"
-              title="Tổng thống Nga"
-            />
-            <SpeakerCard
-              image={require('./assets/img/MTP.jpg')}
-              name="Sơn Tùng M-TP"
-              title="Ca sĩ & Nhà sáng tạo"
-            />
+            <SpeakerCard image={require('./assets/img/timcook.jpg')} name="Tim Cook" title="CEO của Apple" />
+            <SpeakerCard image={require('./assets/img/USAFA_Hosts_Elon_Musk.jpg')} name="Elon Musk" title="CEO Tesla & SpaceX" />
+            <SpeakerCard image={require('./assets/img/putin.jpg')} name="Putin" title="Tổng thống Nga" />
+            <SpeakerCard image={require('./assets/img/MTP.jpg')} name="Sơn Tùng M-TP" title="Ca sĩ & Nhà sáng tạo" />
           </ScrollView>
         </View>
 
@@ -101,37 +83,56 @@ export default function HomeS() {
           <Text style={styles.sectionTitle}>Sự kiện nổi bật</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {eventList.slice(0, 3).map(event => (
-              <EventCard
+              <View
                 key={event.id}
-                image={event.image}
-                title={event.title}
-                start={event.start}
-                end={event.end}
-                location={event.location}
-                price={event.price}
-              />
+                style={{
+                  width: screenWidth * 0.9,
+                  backgroundColor: '#fff',
+                  borderRadius: 12,
+                  padding: 14,
+                  marginRight: 16,
+                  shadowColor: '#000',
+                  shadowOpacity: 0.1,
+                  shadowRadius: 6,
+                  elevation: 3,
+                }}>
+                <Image source={event.image} style={{ width: '100%', height: 180, borderRadius: 10 }} />
+                <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>{event.title}</Text>
+                <Text style={{ fontSize: 14, color: '#555', marginTop: 8 }}>🕒 {new Date(event.start).toLocaleString('vi-VN')}</Text>
+                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>🕒 {new Date(event.end).toLocaleString('vi-VN')}</Text>
+                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>📍 {event.location}</Text>
+                <Text style={{ marginTop: 4, fontWeight: 'bold', color: '#e91e63' }}>💵 {parseInt(event.price).toLocaleString()}₫</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 6, flex: 1, marginRight: 8 }}
+                    onPress={() => navigation.navigate('EventDetail', { event })}>
+                    <Text style={{ color: '#fff', textAlign: 'center' }}>Chi tiết</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ backgroundColor: '#28a745', padding: 10, borderRadius: 6, flex: 1 }}
+                    onPress={() => navigation.navigate('EventDetail', { event })}>
+                    <Text style={{ color: '#fff', textAlign: 'center' }}>Đăng ký</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             ))}
           </ScrollView>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Câu hỏi thường gặp</Text>
-
           <FaqItem
             question="Tôi có thể hủy đăng ký sự kiện nếu không tham gia được không?"
             answer="Bạn nên kiểm tra chính sách hủy đăng ký của sự kiện. Nhiều sự kiện cho phép hủy miễn phí trong một khoảng thời gian nhất định trước ngày diễn ra."
           />
-
           <FaqItem
             question="Sự kiện có yêu cầu đăng ký trước không?"
             answer="Thông thường, các sự kiện sẽ yêu cầu đăng ký trước để đảm bảo chỗ ngồi và chuẩn bị tài liệu cần thiết cho người tham dự."
           />
-
           <FaqItem
             question="Tôi có nhận được chứng nhận khi tham dự sự kiện không?"
             answer="Một số sự kiện (đặc biệt là hội thảo, khóa đào tạo) sẽ cấp chứng nhận tham dự, hãy hỏi rõ khi đăng ký."
           />
-
           <FaqItem
             question="Tham dự sự kiện có mất phí không?"
             answer="Tùy vào loại sự kiện. Có sự kiện hoàn toàn miễn phí, nhưng cũng có những sự kiện yêu cầu mua vé hoặc đóng phí đăng ký."
@@ -175,9 +176,7 @@ const FaqItem = ({ question, answer }) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f8f8' },
+  safeArea: { flex: 1, backgroundColor: '#f8f8f8' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -229,8 +228,6 @@ const styles = StyleSheet.create({
   speakerImage: { width: 120, height: 120, borderRadius: 60, marginBottom: 8 },
   speakerName: { fontWeight: 'bold', fontSize: 16 },
   speakerTitle: { fontSize: 14, color: '#777' },
-
- 
   faqItem: {
     marginBottom: 12,
     borderRadius: 10,
