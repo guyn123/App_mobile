@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
+
 // Import các màn hình
 import HomeS from './Home';
 import EventE from './Event';
@@ -13,7 +14,7 @@ import ProfilePP from './Profile';
 import AccountA from './Account'; // 👈 Màn hình đăng nhập
 import EventDetail from './EventDetail'; // 👈 Thêm màn hình chi tiết sự kiện
 import DKEvent from './DKEvent'; // 👈 Thêm màn hình đăng ký
-
+import SplashScreen from './SplashScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -65,6 +66,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Splash" component={SplashScreen} /> 
         <Stack.Screen name="Quaylai" component={QuayLai} />
         <Stack.Screen name="Account" component={AccountA} />
         <Stack.Screen name="EventDetail" component={EventDetail}options={{ headerShown: true, title: 'Chi tiết sự kiện' }}/>
