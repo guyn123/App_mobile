@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function EventDetail({ route }) {
   const { event, username } = route.params;
@@ -7,6 +8,8 @@ export default function EventDetail({ route }) {
   const [reviewContent, setReviewContent] = useState('');
   const [reviews, setReviews] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const navigation = useNavigation();
 
   const handleSelectStars = (stars) => {
     setReviewStars(stars);
@@ -45,9 +48,13 @@ export default function EventDetail({ route }) {
         </View>
         <Text style={styles.info}><Text style={styles.label}>GHẾ NGỒI:</Text> {event.bookedSeats}/{event.totalSeats}</Text>
         <Text style={styles.info}><Text style={styles.label}>TRẠNG THÁI:</Text> {event.status || 'Chưa cập nhật'}</Text>
-        <TouchableOpacity style={styles.registerBtn}>
-          <Text style={styles.registerText}>Đăng ký</Text>
-        </TouchableOpacity>
+<TouchableOpacity
+  style={styles.registerBtn}
+  onPress={() => navigation.navigate('DKEvent', { id: event.id })}
+>
+  <Text style={styles.registerText}>Đăng ký</Text>
+</TouchableOpacity>
+
       </View>
 
       {/* Đánh giá sự kiện */}
