@@ -14,22 +14,29 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function AccountA() {
   const [activeTab, setActiveTab] = useState('login');
-  const [agree, setAgree] = useState(false);
-  const [gender, setGender] = useState('');
+  const [tenDangNhap, setTenDangNhap] = useState('');
+  const [matKhau, setMatKhau] = useState('');
+  const [xacNhanMatKhau, setXacNhanMatKhau] = useState('');
+  const [hoTen, setHoTen] = useState('');
+  const [gioiTinh, setGioiTinh] = useState('');
+  const [soTuoi, setSoTuoi] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [diaChi, setDiaChi] = useState('');
+
   const navigation = useNavigation();
 
   const RadioOption = ({ label, value }) => (
     <TouchableOpacity
       style={styles.radioOption}
-      onPress={() => setGender(value)}>
-      <View style={[styles.radioCircle, gender === value && styles.radioChecked]} />
+      onPress={() => setGioiTinh(value)}>
+      <View style={[styles.radioCircle, gioiTinh === value && styles.radioChecked]} />
       <Text style={styles.radioLabel}>{label}</Text>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.header}>
         <Image
           source={require('./assets/img/banners/original.png')}
@@ -42,45 +49,52 @@ export default function AccountA() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        
-        {/* Tabs */}
-<View style={styles.tabs}>
-  <TouchableOpacity
-    style={[
-      styles.tab,
-      activeTab === 'login' ? styles.tabActive : styles.tabInactive,
-    ]}
-    onPress={() => setActiveTab('login')}
-  >
-    <Text style={[
-      styles.tabText,
-      activeTab === 'login' && styles.tabTextActive
-    ]}>Đăng nhập</Text>
-  </TouchableOpacity>
+        <View style={styles.tabs}>
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              activeTab === 'login' ? styles.tabActive : styles.tabInactive,
+            ]}
+            onPress={() => setActiveTab('login')}
+          >
+            <Text style={[
+              styles.tabText,
+              activeTab === 'login' && styles.tabTextActive
+            ]}>Đăng nhập</Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity
-    style={[
-      styles.tab,
-      activeTab === 'register' ? styles.tabActive : styles.tabInactive,
-    ]}
-    onPress={() => setActiveTab('register')}
-  >
-    <Text style={[
-      styles.tabText,
-      activeTab === 'register' && styles.tabTextActive
-    ]}>Đăng ký</Text>
-  </TouchableOpacity>
-</View>
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              activeTab === 'register' ? styles.tabActive : styles.tabInactive,
+            ]}
+            onPress={() => setActiveTab('register')}
+          >
+            <Text style={[
+              styles.tabText,
+              activeTab === 'register' && styles.tabTextActive
+            ]}>Đăng ký</Text>
+          </TouchableOpacity>
+        </View>
 
-
-        {/* Nội dung form */}
         {activeTab === 'login' ? (
           <View style={styles.form}>
             <Text style={styles.formTitle}>Đăng nhập</Text>
             <Text style={styles.label}>Tên đăng nhập *</Text>
-            <TextInput style={styles.input} placeholder="Tên đăng nhập" />
+            <TextInput
+              style={styles.input}
+              placeholder="Tên đăng nhập"
+              value={tenDangNhap}
+              onChangeText={setTenDangNhap}
+            />
             <Text style={styles.label}>Mật khẩu *</Text>
-            <TextInput style={styles.input} placeholder="Mật khẩu" secureTextEntry />
+            <TextInput
+              style={styles.input}
+              placeholder="Mật khẩu"
+              secureTextEntry
+              value={matKhau}
+              onChangeText={setMatKhau}
+            />
 
             <TouchableOpacity style={styles.linkBtn}>
               <Text style={styles.link}>Quên mật khẩu?</Text>
@@ -95,16 +109,38 @@ export default function AccountA() {
             <Text style={styles.formTitle}>Đăng ký</Text>
 
             <Text style={styles.label}>Họ và tên *</Text>
-            <TextInput style={styles.input} placeholder="Họ và tên" />
+            <TextInput
+              style={styles.input}
+              placeholder="Họ và tên"
+              value={hoTen}
+              onChangeText={setHoTen}
+            />
 
             <Text style={styles.label}>Tên đăng nhập *</Text>
-            <TextInput style={styles.input} placeholder="Tên đăng nhập" />
+            <TextInput
+              style={styles.input}
+              placeholder="Tên đăng nhập"
+              value={tenDangNhap}
+              onChangeText={setTenDangNhap}
+            />
 
             <Text style={styles.label}>Mật khẩu *</Text>
-            <TextInput style={styles.input} placeholder="Mật khẩu" secureTextEntry />
+            <TextInput
+              style={styles.input}
+              placeholder="Mật khẩu"
+              secureTextEntry
+              value={matKhau}
+              onChangeText={setMatKhau}
+            />
 
             <Text style={styles.label}>Xác nhận mật khẩu *</Text>
-            <TextInput style={styles.input} placeholder="Nhập lại mật khẩu" secureTextEntry />
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập lại mật khẩu"
+              secureTextEntry
+              value={xacNhanMatKhau}
+              onChangeText={setXacNhanMatKhau}
+            />
 
             <Text style={styles.label}>Giới tính *</Text>
             <View style={styles.radioGroup}>
@@ -113,16 +149,39 @@ export default function AccountA() {
             </View>
 
             <Text style={styles.label}>Tuổi *</Text>
-            <TextInput style={styles.input} placeholder="Tuổi" keyboardType="numeric" />
+            <TextInput
+              style={styles.input}
+              placeholder="Tuổi"
+              keyboardType="numeric"
+              value={soTuoi}
+              onChangeText={setSoTuoi}
+            />
 
             <Text style={styles.label}>Email *</Text>
-            <TextInput style={styles.input} placeholder="Email" keyboardType="email-address" />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
 
             <Text style={styles.label}>Số điện thoại *</Text>
-            <TextInput style={styles.input} placeholder="Số điện thoại" keyboardType="phone-pad" />
+            <TextInput
+              style={styles.input}
+              placeholder="Số điện thoại"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
 
             <Text style={styles.label}>Địa chỉ *</Text>
-            <TextInput style={styles.input} placeholder="Địa chỉ" />
+            <TextInput
+              style={styles.input}
+              placeholder="Địa chỉ"
+              value={diaChi}
+              onChangeText={setDiaChi}
+            />
 
             <TouchableOpacity
               style={[styles.submitBtn, { backgroundColor: '#007bff' }]}
@@ -136,6 +195,7 @@ export default function AccountA() {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f4f4f4' },

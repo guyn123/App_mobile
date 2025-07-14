@@ -35,26 +35,30 @@ export default function EventDetail({ route }) {
       {/* Chi tiết sự kiện */}
       <View style={styles.card}>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Image source={event.image} style={styles.image} />
+          <Image source={event.anhSuKien} style={styles.image} />
         </TouchableOpacity>
-        <Text style={styles.title}>{event.title}</Text>
-        <Text style={styles.info}><Text style={styles.label}>BẮT ĐẦU:</Text> {new Date(event.start).toLocaleString('vi-VN')}</Text>
-        <Text style={styles.info}><Text style={styles.label}>KẾT THÚC:</Text> {new Date(event.end).toLocaleString('vi-VN')}</Text>
-        <Text style={styles.info}><Text style={styles.label}>ĐỊA ĐIỂM:</Text> {event.location}</Text>
-        <Text style={styles.info}><Text style={styles.label}>GIÁ VÉ:</Text> {parseInt(event.price).toLocaleString()}₫</Text>
+        <Text style={styles.title}>{event.tenSuKien}</Text>
+        <Text style={styles.info}><Text style={styles.label}>BẮT ĐẦU:</Text> {new Date(event.ngayBatDau).toLocaleString('vi-VN')}</Text>
+        <Text style={styles.info}><Text style={styles.label}>KẾT THÚC:</Text> {new Date(event.ngayKetThuc).toLocaleString('vi-VN')}</Text>
+        <Text style={styles.info}><Text style={styles.label}>ĐỊA ĐIỂM:</Text> {event.diaDiem}</Text>
+        <Text style={styles.info}><Text style={styles.label}>GIÁ VÉ:</Text> {parseInt(event.phiThamGia).toLocaleString()}₫</Text>
         <View style={styles.row}>
           <Text style={styles.label}>MÔ TẢ: </Text>
-          <Text style={styles.description}>{event.description}</Text>
+          <Text style={styles.description}>{event.moTa}</Text>
         </View>
-        <Text style={styles.info}><Text style={styles.label}>GHẾ NGỒI:</Text> {event.bookedSeats}/{event.totalSeats}</Text>
-        <Text style={styles.info}><Text style={styles.label}>TRẠNG THÁI:</Text> {event.status || 'Chưa cập nhật'}</Text>
-<TouchableOpacity
-  style={styles.registerBtn}
-  onPress={() => navigation.navigate('DKEvent', { id: event.id })}
->
-  <Text style={styles.registerText}>Đăng ký</Text>
-</TouchableOpacity>
+        <Text style={styles.info}>
+          <Text style={styles.label}>GHẾ NGỒI:</Text> {event.soNguoiDaDangKy}/{event.luongChoNgoi}
+        </Text>
+        <Text style={styles.info}>
+          <Text style={styles.label}>TRẠNG THÁI:</Text> {event.trangThaiSuKien || 'Chưa cập nhật'}
+        </Text>
 
+        <TouchableOpacity
+          style={styles.registerBtn}
+          onPress={() => navigation.navigate('DKEvent', { id: event.maSuKien })}
+        >
+          <Text style={styles.registerText}>Đăng ký</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Đánh giá sự kiện */}
@@ -100,7 +104,7 @@ export default function EventDetail({ route }) {
       {/* Modal ảnh */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
-          <Image source={event.image} style={styles.fullImage} resizeMode="contain" />
+          <Image source={event.anhSuKien} style={styles.fullImage} resizeMode="contain" />
         </Pressable>
       </Modal>
     </ScrollView>

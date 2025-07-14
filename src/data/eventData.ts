@@ -1,185 +1,185 @@
 export interface EventItem {
-  id: number;
-  category: string;
-  title: string;
-  image: string;
-  start: string;
-  end: string;
-  location: string;
-  price: string;
-  description: string;
-  totalSeats: number;
-  bookedSeats: number;
-  status: string;
+  maSuKien: number;
+  tenDanhMuc: string;
+  tenSuKien: string;
+  anhSuKien: string;
+  ngayBatDau: string;
+  ngayKetThuc: string;
+  diaDiem: string;
+  phiThamGia: string;
+  moTa: string;
+  luongChoNgoi: number;
+  soNguoiDaDangKy: number;
+  trangThaiSuKien: string;
 }
 
-export const eventList = [
-    { id: 1,
-    category: "tech",
-    title: "Hội nghị Công nghệ 2025",
-    image: require('../../assets/img/products/hoinghicongnghe.jpg'),
-    start: "2025-06-28T22:13",
-    end: "2025-06-28T22:30",
-    location: "Hà Nội",
-    price: "500000",
-    description: "Hội nghị về trí tuệ nhân tạo và công nghệ tương lai.",
-    totalSeats: 100,
-    bookedSeats: 10,
-    status: ""
+export const eventList: EventItem[] = [
+  {
+    maSuKien: 1,
+    tenDanhMuc: "tech",
+    tenSuKien: "Hội nghị Công nghệ 2025",
+    anhSuKien: require('../../assets/img/products/hoinghicongnghe.jpg'),
+    ngayBatDau: "2025-06-28T22:13",
+    ngayKetThuc: "2025-06-28T22:30",
+    diaDiem: "Hà Nội",
+    phiThamGia: "500000",
+    moTa: "Hội nghị về trí tuệ nhân tạo và công nghệ tương lai.",
+    luongChoNgoi: 120,
+    soNguoiDaDangKy: 10,
+    trangThaiSuKien: ""
   },
   {
-    id: 2,
-    category: "music",
-    title: "Lễ hội Âm nhạc Mùa hè",
-    image: require('../../assets/img/products/amnhacmuahe.jpg'),
-    start: "2025-08-10T18:00",
-    end: "2025-08-10T23:00",
-    location: "TP.HCM",
-    price: "300000",
-    description: "Sự kiện âm nhạc với các nghệ sĩ nổi tiếng.",
-    totalSeats: 100,
-    bookedSeats: 100,
-    status: ""
+    maSuKien: 2,
+    tenDanhMuc: "music",
+    tenSuKien: "Lễ hội Âm nhạc Mùa hè",
+    anhSuKien: require('../../assets/img/products/amnhacmuahe.jpg'),
+    ngayBatDau: "2025-08-10T18:00",
+    ngayKetThuc: "2025-08-10T23:00",
+    diaDiem: "TP.HCM",
+    phiThamGia: "300000",
+    moTa: "Sự kiện âm nhạc với các nghệ sĩ nổi tiếng.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 100,
+    trangThaiSuKien: ""
   },
   {
-    id: 3,
-    category: "education",
-    title: "Hội thảo Du học Nhật Bản",
-    image: require('../../assets/img/products/duhoc.jpg'),
-    start: "2025-08-15T09:00",
-    end: "2025-08-15T12:00",
-    location: "Đà Nẵng",
-    price: "0",
-    description: "Giới thiệu học bổng và chương trình du học.",
-    totalSeats: 100,
-    bookedSeats: 75,
-    status: ""
+    maSuKien: 3,
+    tenDanhMuc: "education",
+    tenSuKien: "Hội thảo Du học Nhật Bản",
+    anhSuKien: require('../../assets/img/products/duhoc.jpg'),
+    ngayBatDau: "2025-08-15T09:00",
+    ngayKetThuc: "2025-08-15T12:00",
+    diaDiem: "Đà Nẵng",
+    phiThamGia: "0",
+    moTa: "Giới thiệu học bổng và chương trình du học.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 75,
+    trangThaiSuKien: ""
   },
   {
-    id: 4,
-    category: "tech",
-    title: "Workshop Thiết kế UX/UI",
-    image: require('../../assets/img/products/uxui.jpg'),
-    start: "2025-08-18T13:00",
-    end: "2025-08-18T17:00",
-    location: "Hà Nội",
-    price: "200000",
-    description: "Thực hành thiết kế giao diện người dùng chuyên nghiệp.",
-    totalSeats: 100,
-    bookedSeats: 65,
-    status: ""
+    maSuKien: 4,
+    tenDanhMuc: "tech",
+    tenSuKien: "Workshop Thiết kế UX/UI",
+    anhSuKien: require('../../assets/img/products/uxui.jpg'),
+    ngayBatDau: "2025-08-18T13:00",
+    ngayKetThuc: "2025-08-18T17:00",
+    diaDiem: "Hà Nội",
+    phiThamGia: "200000",
+    moTa: "Thực hành thiết kế giao diện người dùng chuyên nghiệp.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 65,
+    trangThaiSuKien: ""
   },
   {
-    id: 5,
-    category: "education",
-    title: "Talkshow Kỹ năng mềm",
-    image: require('../../assets/img/products/kinangmem.jpg'),
-    start: "2025-08-20T18:00",
-    end: "2025-08-20T20:00",
-    location: "TP.HCM",
-    price: "50000",
-    description: "Chia sẻ về kỹ năng giao tiếp, làm việc nhóm và thuyết trình.",
-    totalSeats: 100,
-    bookedSeats: 55,
-    status: ""
+    maSuKien: 5,
+    tenDanhMuc: "education",
+    tenSuKien: "Talkshow Kỹ năng mềm",
+    anhSuKien: require('../../assets/img/products/kinangmem.jpg'),
+    ngayBatDau: "2025-08-20T18:00",
+    ngayKetThuc: "2025-08-20T20:00",
+    diaDiem: "TP.HCM",
+    phiThamGia: "50000",
+    moTa: "Chia sẻ về kỹ năng giao tiếp, làm việc nhóm và thuyết trình.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 55,
+    trangThaiSuKien: ""
   },
   {
-    id: 6,
-    category: "festival",
-    title: "Lễ hội Văn hóa Việt Nam",
-    image: require('../../assets/img/products/vanhoa.jpg'),
-    start: "2025-08-25T10:00",
-    end: "2025-08-25T20:00",
-    location: "Huế",
-    price: "100000",
-    description: "Trưng bày di sản, ẩm thực và âm nhạc truyền thống.",
-    totalSeats: 100,
-    bookedSeats: 30,
-    status: ""
+    maSuKien: 6,
+    tenDanhMuc: "festival",
+    tenSuKien: "Lễ hội Văn hóa Việt Nam",
+    anhSuKien: require('../../assets/img/products/vanhoa.jpg'),
+    ngayBatDau: "2025-08-25T10:00",
+    ngayKetThuc: "2025-08-25T20:00",
+    diaDiem: "Huế",
+    phiThamGia: "100000",
+    moTa: "Trưng bày di sản, ẩm thực và âm nhạc truyền thống.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 30,
+    trangThaiSuKien: ""
   },
   {
-    id: 7,
-    category: "music",
-    title: "Đêm nhạc Acoustic",
-    image: require('../../assets/img/products/demamnhac.jpg'),
-    start: "2025-08-28T19:00",
-    end: "2025-08-28T21:00",
-    location: "Hà Nội",
-    price: "150000",
-    description: "Trình diễn âm nhạc acoustic nhẹ nhàng tại không gian mở.",
-    totalSeats: 100,
-    bookedSeats: 80,
-    status: ""
+    maSuKien: 7,
+    tenDanhMuc: "music",
+    tenSuKien: "Đêm nhạc Acoustic",
+    anhSuKien: require('../../assets/img/products/demamnhac.jpg'),
+    ngayBatDau: "2025-08-28T19:00",
+    ngayKetThuc: "2025-08-28T21:00",
+    diaDiem: "Hà Nội",
+    phiThamGia: "150000",
+    moTa: "Trình diễn âm nhạc acoustic nhẹ nhàng tại không gian mở.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 80,
+    trangThaiSuKien: ""
   },
   {
-    id: 8,
-    category: "festival",
-    title: "Lễ hội Trung thu",
-    image: require('../../assets/img/products/8.jpg'),
-    start: "2025-09-15T17:00",
-    end: "2025-09-15T22:00",
-    location: "TP.HCM",
-    price: "0",
-    description: "Múa lân, rước đèn và các hoạt động dân gian.",
-    totalSeats: 100,
-    bookedSeats: 95,
-    status: ""
+    maSuKien: 8,
+    tenDanhMuc: "festival",
+    tenSuKien: "Lễ hội Trung thu",
+    anhSuKien: require('../../assets/img/products/8.jpg'),
+    ngayBatDau: "2025-09-15T17:00",
+    ngayKetThuc: "2025-09-15T22:00",
+    diaDiem: "TP.HCM",
+    phiThamGia: "0",
+    moTa: "Múa lân, rước đèn và các hoạt động dân gian.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 95,
+    trangThaiSuKien: ""
   },
   {
-    id: 9,
-    category: "education",
-    title: "Khóa học Lập trình Web cơ bản",
-    image: require('../../assets/img/products/9.jpg'),
-    start: "2025-09-05T09:00",
-    end: "2025-09-05T17:00",
-    location: "Online",
-    price: "100000",
-    description: "Học HTML, CSS và JavaScript cho người mới bắt đầu.",
-    totalSeats: 100,
-    bookedSeats: 60,
-    status: ""
+    maSuKien: 9,
+    tenDanhMuc: "education",
+    tenSuKien: "Khóa học Lập trình Web cơ bản",
+    anhSuKien: require('../../assets/img/products/9.jpg'),
+    ngayBatDau: "2025-09-05T09:00",
+    ngayKetThuc: "2025-09-05T17:00",
+    diaDiem: "Online",
+    phiThamGia: "100000",
+    moTa: "Học HTML, CSS và JavaScript cho người mới bắt đầu.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 60,
+    trangThaiSuKien: ""
   },
   {
-    id: 10,
-    category: "tech",
-    title: "Hội thảo Blockchain 2025",
-    image: require('../../assets/img/products/10.jpg'),
-    start: "2025-09-12T08:00",
-    end: "2025-09-12T16:00",
-    location: "Đà Nẵng",
-    price: "400000",
-    description: "Tìm hiểu công nghệ blockchain và các ứng dụng thực tế.",
-    totalSeats: 100,
-    bookedSeats: 100,
-    status: ""
+    maSuKien: 10,
+    tenDanhMuc: "tech",
+    tenSuKien: "Hội thảo Blockchain 2025",
+    anhSuKien: require('../../assets/img/products/10.jpg'),
+    ngayBatDau: "2025-09-12T08:00",
+    ngayKetThuc: "2025-09-12T16:00",
+    diaDiem: "Đà Nẵng",
+    phiThamGia: "400000",
+    moTa: "Tìm hiểu công nghệ blockchain và các ứng dụng thực tế.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 100,
+    trangThaiSuKien: ""
   },
   {
-    id: 11,
-    category: "tech",
-    title: "Seminar về Trí tuệ Nhân tạo",
-    image: require('../../assets/img/products/11.jpg'),
-    start: "2025-09-20T09:00",
-    end: "2025-09-20T12:00",
-    location: "Hà Nội",
-    price: "250000",
-    description: "Thảo luận chuyên sâu về AI và học máy.",
-    totalSeats: 100,
-    bookedSeats: 85,
-    status: ""
+    maSuKien: 11,
+    tenDanhMuc: "tech",
+    tenSuKien: "Seminar về Trí tuệ Nhân tạo",
+    anhSuKien: require('../../assets/img/products/11.jpg'),
+    ngayBatDau: "2025-09-20T09:00",
+    ngayKetThuc: "2025-09-20T12:00",
+    diaDiem: "Hà Nội",
+    phiThamGia: "250000",
+    moTa: "Thảo luận chuyên sâu về AI và học máy.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 85,
+    trangThaiSuKien: ""
   },
   {
-    id: 12,
-    category: "music",
-    title: "Live Concert Quốc tế",
-    image: require('../../assets/img/products/12.jpg'),
-    start: "2025-09-22T18:00",
-    end: "2025-09-22T23:00",
-    location: "TP.HCM",
-    price: "450000",
-    description: "Chương trình ca nhạc với các nghệ sĩ quốc tế.",
-    totalSeats: 100,
-    bookedSeats: 100,
-    status: ""
+    maSuKien: 12,
+    tenDanhMuc: "music",
+    tenSuKien: "Live Concert Quốc tế",
+    anhSuKien: require('../../assets/img/products/12.jpg'),
+    ngayBatDau: "2025-09-22T18:00",
+    ngayKetThuc: "2025-09-22T23:00",
+    diaDiem: "TP.HCM",
+    phiThamGia: "450000",
+    moTa: "Chương trình ca nhạc với các nghệ sĩ quốc tế.",
+    luongChoNgoi: 100,
+    soNguoiDaDangKy: 100,
+    trangThaiSuKien: ""
   }
-  // ... thêm các sự kiện khác
 ];

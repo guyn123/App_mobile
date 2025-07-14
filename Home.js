@@ -9,7 +9,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Dimensions
+  Dimensions,
+  Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
@@ -17,25 +18,17 @@ export default function HomeS() {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
 
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  const handleSearch = () => {
+    navigation.navigate('Event', { keyword: searchKeyword });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
-        <View style={styles.header}>
-          <Image
-            source={require('./assets/img/banners/original.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm kiếm sự kiện..."
-            placeholderTextColor="#666"
-          />
-          <View style={styles.searchButton}>
-            <Text style={styles.searchButtonText}>Tìm</Text>
-          </View>
-        </View>
-
         <ScrollView horizontal pagingEnabled style={styles.slider}>
           <Image
             source={require('./assets/img/nghien-cuu-khoa-hoc-sinh-vien-truong-dai-hoc-cmc-19.jpg')}
@@ -82,9 +75,9 @@ export default function HomeS() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sự kiện nổi bật</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {eventList.slice(0, 3).map(event => (
+            {eventList.slice(0, 5).map(event => (
               <View
-                key={event.id}
+                key={event.maSuKien}
                 style={{
                   width: screenWidth * 0.9,
                   backgroundColor: '#fff',
@@ -96,12 +89,17 @@ export default function HomeS() {
                   shadowRadius: 6,
                   elevation: 3,
                 }}>
-                <Image source={event.image} style={{ width: '100%', height: 180, borderRadius: 10 }} />
-                <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>{event.title}</Text>
-                <Text style={{ fontSize: 14, color: '#555', marginTop: 8 }}>🕒 {new Date(event.start).toLocaleString('vi-VN')}</Text>
-                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>🕒 {new Date(event.end).toLocaleString('vi-VN')}</Text>
-                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>📍 {event.location}</Text>
-                <Text style={{ marginTop: 4, fontWeight: 'bold', color: '#e91e63' }}>💵 {parseInt(event.price).toLocaleString()}₫</Text>
+                <TouchableOpacity onPress={() => {
+                  setSelectedImage(event.anhSuKien);
+                  setModalVisible(true);
+                }}>
+                  <Image source={event.anhSuKien} style={{ width: '100%', height: 180, borderRadius: 10 }} />
+                </TouchableOpacity>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>{event.tenSuKien}</Text>
+                <Text style={{ fontSize: 14, color: '#555', marginTop: 8 }}>🕒 {new Date(event.ngayBatDau).toLocaleString('vi-VN')}</Text>
+                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>🕒 {new Date(event.ngayKetThuc).toLocaleString('vi-VN')}</Text>
+                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>📍 {event.diaDiem}</Text>
+                <Text style={{ marginTop: 4, fontWeight: 'bold', color: '#e91e63' }}>💵 {parseInt(event.phiThamGia).toLocaleString()}₫</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
                   <TouchableOpacity
                     style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 6, flex: 1, marginRight: 8 }}
@@ -110,8 +108,8 @@ export default function HomeS() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{ backgroundColor: '#28a745', padding: 10, borderRadius: 6, flex: 1 }}
-                    onPress={() => navigation.navigate('DKEvent', { id: event.id })}
->
+                    onPress={() => navigation.navigate('DKEvent', { id: event.maSuKien })}
+                  >
                     <Text style={{ color: '#fff', textAlign: 'center' }}>Đăng ký</Text>
                   </TouchableOpacity>
                 </View>
@@ -140,6 +138,17 @@ export default function HomeS() {
           />
         </View>
       </ScrollView>
+
+      {/* MODAL phóng ảnh */}
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setModalVisible(false)}
+        >
+          <Image source={selectedImage} style={styles.fullImage} resizeMode="contain" />
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -151,8 +160,6 @@ const FeatureItem = ({ image, title, desc }) => (
     <Text style={styles.featureDesc}>{desc}</Text>
   </View>
 );
-
-
 
 const SpeakerCard = ({ image, name, title }) => (
   <View style={styles.speakerCard}>
@@ -177,6 +184,7 @@ const FaqItem = ({ question, answer }) => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f8f8f8' },
@@ -246,4 +254,14 @@ const styles = StyleSheet.create({
     borderTopColor: '#ccc',
   },
   faqAnswerText: { fontSize: 14, color: '#333' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullImage: {
+    width: '90%',
+    height: '70%',
+  },
 });

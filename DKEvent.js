@@ -6,17 +6,17 @@ import { eventList } from './src/data/eventData';
 export default function DKEvent() {
   const route = useRoute();
   const { id } = route.params;
-  const event = eventList.find(e => e.id === id);
+  const event = eventList.find(e => e.maSuKien === id);
 
-  const [step, setStep] = useState(2); // Bỏ qua bước 1, nhảy thẳng tới chọn ghế
+  const [step, setStep] = useState(2);
   const [selectedSeat, setSelectedSeat] = useState(null);
   const [method, setMethod] = useState(null);
   const [countdown, setCountdown] = useState(180);
   const [paid, setPaid] = useState(false);
   const ticketCode = 'VE20250712105214';
 
-  const seats = Array.from({ length: event.totalSeats }, (_, i) => i + 1);
-  const bookedSeats = []; // Ban đầu không có ghế nào bị đặt
+  const seats = Array.from({ length: event.luongChoNgoi }, (_, i) => i + 1);
+  const bookedSeats = []; // Có thể load từ database nếu có
 
   useEffect(() => {
     let timer;
@@ -35,20 +35,17 @@ export default function DKEvent() {
 
   return (
     <ScrollView style={styles.container}>
-      
+      {!paid && (
+        <View style={styles.box}>
+          <Text style={styles.eventTitle}>{event.tenSuKien}</Text>
+          <Text>Bắt đầu: {new Date(event.ngayBatDau).toLocaleString('vi-VN')}</Text>
+          <Text>Kết thúc: {new Date(event.ngayKetThuc).toLocaleString('vi-VN')}</Text>
+          <Text>Địa điểm: {event.diaDiem}</Text>
+          <Text>Giá vé: {toCurrency(event.phiThamGia)}</Text>
+        </View>
+      )}
 
-    {!paid && (
-  <View style={styles.box}>
-    <Text style={styles.eventTitle}>{event.title}</Text>
-    <Text>Bắt đầu: {new Date(event.start).toLocaleString('vi-VN')}</Text>
-    <Text>Kết thúc: {new Date(event.end).toLocaleString('vi-VN')}</Text>
-    <Text>Địa điểm: {event.location}</Text>
-    <Text>Giá vé: {toCurrency(event.price)}</Text>
-  </View>
-)}
-
-
-      {/* Sơ đồ chỗ ngồi */}
+      {/* Chọn chỗ ngồi */}
       {step === 2 && (
         <View style={styles.box}>
           <Text style={styles.sectionTitle}>Sơ đồ chỗ ngồi</Text>
@@ -76,9 +73,7 @@ export default function DKEvent() {
                   key={seat}
                   disabled={isBooked}
                   style={[styles.seat, { backgroundColor: bgColor }]}
-                  onPress={() =>
-                    setSelectedSeat(seat === selectedSeat ? null : seat)
-                  }>
+                  onPress={() => setSelectedSeat(seat === selectedSeat ? null : seat)}>
                   <Text style={styles.seatText}>{seat}</Text>
                 </TouchableOpacity>
               );
@@ -101,17 +96,13 @@ export default function DKEvent() {
           <Text>Họ tên: Nguyễn Văn A</Text>
           <Text>Số điện thoại: 0987654321</Text>
           <Text>Ghế: {selectedSeat}</Text>
-          <Text>Tổng tiền: {toCurrency(event.price)}</Text>
+          <Text>Tổng tiền: {toCurrency(event.phiThamGia)}</Text>
           <Text style={{ marginTop: 8, fontWeight: 'bold' }}>Phương thức thanh toán:</Text>
-          {['MoMo', 'ZaloPay', ].map(item => (
+          {['MoMo', 'ZaloPay'].map(item => (
             <TouchableOpacity
               key={item}
-              style={[
-                styles.methodBtn,
-                method === item && styles.methodActive,
-              ]}
-              onPress={() => setMethod(item)}
-            >
+              style={[styles.methodBtn, method === item && styles.methodActive]}
+              onPress={() => setMethod(item)}>
               <Text style={{ color: method === item ? '#fff' : '#000' }}>{item}</Text>
             </TouchableOpacity>
           ))}
@@ -124,46 +115,43 @@ export default function DKEvent() {
         </View>
       )}
 
-      {/* QR + xác nhận */}
+      {/* Mã QR */}
       {step === 4 && !paid && (
-  <View style={styles.box}>
-    <Text style={styles.sectionTitle}>QR Thanh toán</Text>
-    <Image
-      source={require('./assets/img/QR.jpg')}
-      style={{ width: 200, height: 200, alignSelf: 'center', marginBottom: 12 }}
-    />
-    <Text>Ngân hàng: MB Bank</Text>
-    <Text>Số tài khoản: 123456789</Text>
-    <Text>Nội dung: Thanh toan ve {ticketCode}</Text>
-    <Text>Tổng tiền: {toCurrency(event.price)}</Text>
-    <Text style={{ marginTop: 8 }}>⏰ Còn lại: {countdown}s</Text>
-    <TouchableOpacity
-      style={[styles.button, { backgroundColor: '#28a745' }]}
-      onPress={() => setPaid(true)}>
-      <Text style={styles.buttonText}>Tôi đã thanh toán</Text>
-    </TouchableOpacity>
-  </View>
-)}
+        <View style={styles.box}>
+          <Text style={styles.sectionTitle}>QR Thanh toán</Text>
+          <Image
+            source={require('./assets/img/QR.jpg')}
+            style={{ width: 200, height: 200, alignSelf: 'center', marginBottom: 12 }}
+          />
+          <Text>Ngân hàng: MB Bank</Text>
+          <Text>Số tài khoản: 123456789</Text>
+          <Text>Nội dung: Thanh toan ve {ticketCode}</Text>
+          <Text>Tổng tiền: {toCurrency(event.phiThamGia)}</Text>
+          <Text style={{ marginTop: 8 }}>⏰ Còn lại: {countdown}s</Text>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#28a745' }]}
+            onPress={() => setPaid(true)}>
+            <Text style={styles.buttonText}>Tôi đã thanh toán</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Hiển thị vé */}
       {paid && (
-<View style={styles.ticketBox}>
-  <Text style={styles.ticketIcon}>🎫</Text>
-  <Text style={styles.ticketTitle}>VÉ THAM DỰ</Text>
-  <View style={styles.ticketContent}>
-    <Text style={styles.ticketText}>Sự kiện: {event.title}</Text>
-    <Text style={styles.ticketText}>Họ tên: Nguyễn Văn A</Text>
-    <Text style={styles.ticketText}>Ghế: {selectedSeat}</Text>
-    <Text style={styles.ticketText}>Phương thức: {method}</Text>
-    <Text style={styles.ticketText}>Ngày đặt: {new Date().toLocaleString('vi-VN')}</Text>
-    <Text style={{ textAlign: 'center', alignSelf: 'center',fontSize: 20,
-  marginTop: 20, }}>
-  🔖 Mã vé: <Text style={styles.code}>{ticketCode}</Text>
-</Text>
-
-  </View>
-</View>
-
+        <View style={styles.ticketBox}>
+          <Text style={styles.ticketIcon}>🎫</Text>
+          <Text style={styles.ticketTitle}>VÉ THAM DỰ</Text>
+          <View style={styles.ticketContent}>
+            <Text style={styles.ticketText}>Sự kiện: {event.tenSuKien}</Text>
+            <Text style={styles.ticketText}>Họ tên: Nguyễn Văn A</Text>
+            <Text style={styles.ticketText}>Ghế: {selectedSeat}</Text>
+            <Text style={styles.ticketText}>Phương thức: {method}</Text>
+            <Text style={styles.ticketText}>Ngày đặt: {new Date().toLocaleString('vi-VN')}</Text>
+            <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 20, marginTop: 20 }}>
+              🔖 Mã vé: <Text style={styles.code}>{ticketCode}</Text>
+            </Text>
+          </View>
+        </View>
       )}
     </ScrollView>
   );
