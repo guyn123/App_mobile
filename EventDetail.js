@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  Pressable
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-export default function EventDetail({ route }) {
-  const { event, username } = route.params;
+export default function EventDetail({ route, username }) {
+  const { event } = route.params;
   const [reviewStars, setReviewStars] = useState(null);
   const [reviewContent, setReviewContent] = useState('');
   const [reviews, setReviews] = useState([]);
@@ -28,6 +39,29 @@ export default function EventDetail({ route }) {
     setReviews([...reviews, newReview]);
     setReviewStars(null);
     setReviewContent('');
+  };
+
+  const handleRegister = () => {
+    const now = new Date();
+    const start = new Date(event.ngayBatDau);
+    const end = new Date(event.ngayKetThuc);
+
+    if (!username) {
+      Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký sự kiện.');
+      return;
+    }
+
+    if (now > end) {
+      Alert.alert('Sự kiện đã kết thúc', 'Bạn không thể đăng ký.');
+      return;
+    }
+
+    if (now >= start && now <= end) {
+      Alert.alert('Sự kiện đang diễn ra', 'Không thể đăng ký vào lúc này.');
+      return;
+    }
+
+    navigation.navigate('DKEvent', { id: event.maSuKien });
   };
 
   return (
@@ -55,7 +89,7 @@ export default function EventDetail({ route }) {
 
         <TouchableOpacity
           style={styles.registerBtn}
-          onPress={() => navigation.navigate('DKEvent', { id: event.maSuKien })}
+          onPress={handleRegister}
         >
           <Text style={styles.registerText}>Đăng ký</Text>
         </TouchableOpacity>
@@ -110,6 +144,7 @@ export default function EventDetail({ route }) {
     </ScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },

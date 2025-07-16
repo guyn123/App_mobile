@@ -1,18 +1,19 @@
+// ✅ FILE: Account.js (đã hoàn chỉnh và lưu đầy đủ thông tin đăng ký)
 import React, { useState } from 'react';
 import {
   SafeAreaView,
+  ScrollView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
-  Image,
   Alert,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-export default function AccountA() {
+export default function AccountA({ setIsLoggedIn, setUsername, users, setUsers }) {
   const [activeTab, setActiveTab] = useState('login');
   const [tenDangNhap, setTenDangNhap] = useState('');
   const [matKhau, setMatKhau] = useState('');
@@ -23,8 +24,45 @@ export default function AccountA() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [diaChi, setDiaChi] = useState('');
-
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
   const navigation = useNavigation();
+
+  const handleLogin = () => {
+    const found = users.find(
+      (u) => u.username === tenDangNhap && u.password === matKhau
+    );
+    if (found) {
+      setIsLoggedIn(true);
+      setUsername(tenDangNhap);
+      Alert.alert('Thành công', 'Đăng nhập thành công!');
+      navigation.navigate('Quaylai');
+    } else {
+      Alert.alert('Thất bại', 'Sai tên đăng nhập hoặc mật khẩu');
+    }
+  };
+
+  const handleRegister = () => {
+    if (!tenDangNhap || !matKhau || !xacNhanMatKhau || !hoTen || !gioiTinh || !soTuoi || !email || !phone || !diaChi) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+    if (matKhau !== xacNhanMatKhau) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return;
+    }
+    const exists = users.some(u => u.username === tenDangNhap);
+    if (exists) {
+      Alert.alert('Lỗi', 'Tên đăng nhập đã tồn tại');
+      return;
+    }
+    setUsers([
+      ...users,
+      { username: tenDangNhap, password: matKhau, hoTen, gioiTinh, soTuoi, email, phone, diaChi }
+    ]);
+    Alert.alert('Thành công', 'Đăng ký thành công!');
+    setActiveTab('login');
+  };
 
   const RadioOption = ({ label, value }) => (
     <TouchableOpacity
@@ -37,259 +75,174 @@ export default function AccountA() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Image
-          source={require('./assets/img/banners/original.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={styles.backBtnText}>← Quay lại</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.centeredContainer}>
+          <Image
+            source={require('./assets/img/banners/original.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <View style={styles.formBox}>
+            {forgotPassword ? (
+              showResetForm ? (
+                <>
+                  <Text style={styles.sectionTitle}>Đặt lại mật khẩu</Text>
+                  <Text style={styles.label}>Mật khẩu mới</Text>
+                  <TextInput style={styles.input} placeholder="Nhập mật khẩu mới" secureTextEntry />
+                  <Text style={styles.label}>Xác nhận mật khẩu</Text>
+                  <TextInput style={styles.input} placeholder="Nhập lại mật khẩu" secureTextEntry />
+                  <TouchableOpacity
+                    style={styles.submitBtn}
+                    onPress={() => {
+                      Alert.alert('Thành công', 'Mật khẩu đã được đặt lại!');
+                      setForgotPassword(false);
+                      setShowResetForm(false);
+                    }}>
+                    <Text style={styles.btnText}>Đặt lại</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { setForgotPassword(false); setShowResetForm(false); }}>
+                    <Text style={styles.forgotLink}>← Quay trở lại </Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.sectionTitle}>Quên mật khẩu</Text>
+                  <Text style={styles.label}>Email</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập email đã đăng ký"
+                    keyboardType="email-address"
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+                  <TouchableOpacity
+                    style={styles.submitBtn}
+                    onPress={() => setShowResetForm(true)}>
+                    <Text style={styles.btnText}>Gửi yêu cầu</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setForgotPassword(false)}>
+                    <Text style={styles.forgotLink}>← Quay trở lại </Text>
+                  </TouchableOpacity>
+                </>
+              )
+            ) : (
+              <>
+                <View style={styles.tabs}>
+                  <TouchableOpacity
+                    style={[styles.tab, activeTab === 'login' && styles.tabActive]}
+                    onPress={() => setActiveTab('login')}>
+                    <Text style={[styles.tabText, activeTab === 'login' && styles.tabTextActive]}>Đăng nhập</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.tab, activeTab === 'register' && styles.tabActive]}
+                    onPress={() => setActiveTab('register')}>
+                    <Text style={[styles.tabText, activeTab === 'register' && styles.tabTextActive]}>Đăng ký</Text>
+                  </TouchableOpacity>
+                </View>
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.tabs}>
-          <TouchableOpacity
-            style={[
-              styles.tab,
-              activeTab === 'login' ? styles.tabActive : styles.tabInactive,
-            ]}
-            onPress={() => setActiveTab('login')}
-          >
-            <Text style={[
-              styles.tabText,
-              activeTab === 'login' && styles.tabTextActive
-            ]}>Đăng nhập</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.tab,
-              activeTab === 'register' ? styles.tabActive : styles.tabInactive,
-            ]}
-            onPress={() => setActiveTab('register')}
-          >
-            <Text style={[
-              styles.tabText,
-              activeTab === 'register' && styles.tabTextActive
-            ]}>Đăng ký</Text>
-          </TouchableOpacity>
+                {activeTab === 'login' ? (
+                  <>
+                    <Text style={styles.label}>Tên đăng nhập</Text>
+                    <TextInput style={styles.input} value={tenDangNhap} onChangeText={setTenDangNhap} />
+                    <Text style={styles.label}>Mật khẩu</Text>
+                    <TextInput style={styles.input} value={matKhau} onChangeText={setMatKhau} secureTextEntry />
+                    <TouchableOpacity style={styles.submitBtn} onPress={handleLogin}>
+                      <Text style={styles.btnText}>Đăng nhập</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setForgotPassword(true)}>
+                      <Text style={styles.forgotLink}>Quên mật khẩu?</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.label}>Họ và tên</Text>
+                    <TextInput style={styles.input} value={hoTen} onChangeText={setHoTen} />
+                    <Text style={styles.label}>Tên đăng nhập</Text>
+                    <TextInput style={styles.input} value={tenDangNhap} onChangeText={setTenDangNhap} />
+                    <Text style={styles.label}>Mật khẩu</Text>
+                    <TextInput style={styles.input} value={matKhau} onChangeText={setMatKhau} secureTextEntry />
+                    <Text style={styles.label}>Xác nhận mật khẩu</Text>
+                    <TextInput style={styles.input} value={xacNhanMatKhau} onChangeText={setXacNhanMatKhau} secureTextEntry />
+                    <Text style={styles.label}>Giới tính</Text>
+                    <View style={styles.radioGroup}>
+                      <RadioOption label="Nam" value="Nam" />
+                      <RadioOption label="Nữ" value="Nữ" />
+                    </View>
+                    <Text style={styles.label}>Tuổi</Text>
+                    <TextInput style={styles.input} value={soTuoi} onChangeText={setSoTuoi} keyboardType="numeric" />
+                    <Text style={styles.label}>Email</Text>
+                    <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
+                    <Text style={styles.label}>Số điện thoại</Text>
+                    <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+                    <Text style={styles.label}>Địa chỉ</Text>
+                    <TextInput style={styles.input} value={diaChi} onChangeText={setDiaChi} />
+                    <TouchableOpacity style={[styles.submitBtn, { backgroundColor: '#007bff' }]} onPress={handleRegister}>
+                      <Text style={styles.btnText}>Đăng ký</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </>
+            )}
+          </View>
         </View>
-
-        {activeTab === 'login' ? (
-          <View style={styles.form}>
-            <Text style={styles.formTitle}>Đăng nhập</Text>
-            <Text style={styles.label}>Tên đăng nhập *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Tên đăng nhập"
-              value={tenDangNhap}
-              onChangeText={setTenDangNhap}
-            />
-            <Text style={styles.label}>Mật khẩu *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Mật khẩu"
-              secureTextEntry
-              value={matKhau}
-              onChangeText={setMatKhau}
-            />
-
-            <TouchableOpacity style={styles.linkBtn}>
-              <Text style={styles.link}>Quên mật khẩu?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.submitBtn} onPress={() => Alert.alert('Đăng nhập', 'Thành công!')}>
-              <Text style={styles.btnText}>Đăng nhập</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.form}>
-            <Text style={styles.formTitle}>Đăng ký</Text>
-
-            <Text style={styles.label}>Họ và tên *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Họ và tên"
-              value={hoTen}
-              onChangeText={setHoTen}
-            />
-
-            <Text style={styles.label}>Tên đăng nhập *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Tên đăng nhập"
-              value={tenDangNhap}
-              onChangeText={setTenDangNhap}
-            />
-
-            <Text style={styles.label}>Mật khẩu *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Mật khẩu"
-              secureTextEntry
-              value={matKhau}
-              onChangeText={setMatKhau}
-            />
-
-            <Text style={styles.label}>Xác nhận mật khẩu *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập lại mật khẩu"
-              secureTextEntry
-              value={xacNhanMatKhau}
-              onChangeText={setXacNhanMatKhau}
-            />
-
-            <Text style={styles.label}>Giới tính *</Text>
-            <View style={styles.radioGroup}>
-              <RadioOption label="Nam" value="Nam" />
-              <RadioOption label="Nữ" value="Nữ" />
-            </View>
-
-            <Text style={styles.label}>Tuổi *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Tuổi"
-              keyboardType="numeric"
-              value={soTuoi}
-              onChangeText={setSoTuoi}
-            />
-
-            <Text style={styles.label}>Email *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
-
-            <Text style={styles.label}>Số điện thoại *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Số điện thoại"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
-            />
-
-            <Text style={styles.label}>Địa chỉ *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Địa chỉ"
-              value={diaChi}
-              onChangeText={setDiaChi}
-            />
-
-            <TouchableOpacity
-              style={[styles.submitBtn, { backgroundColor: '#007bff' }]}
-              onPress={() => Alert.alert('Đăng ký', 'Đăng ký thành công!')}
-            >
-              <Text style={styles.btnText}>Đăng ký</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f4f4f4' },
-  header: {
-    flexDirection: 'row',
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#8ebad3',
-    padding: 10,
+    paddingVertical: 40,
   },
-  logo: { width: 120, height: 50 },
-  backBtn: {
-    marginLeft: 'auto',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#005f8d',
-    borderRadius: 8,
+  logo: {
+    width: 160,
+    height: 60,
+    marginBottom: 20,
   },
-  backBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  container: {
-    padding: 16,
+  formBox: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    elevation: 3,
   },
   tabs: {
     flexDirection: 'row',
-    marginBottom: 16,
     justifyContent: 'center',
-    gap: 16,
+    marginBottom: 16,
   },
   tab: {
     paddingVertical: 10,
     paddingHorizontal: 24,
-    borderWidth: 1,
-    borderColor: '#fff',
     borderRadius: 8,
+    backgroundColor: '#ccc',
+    marginHorizontal: 5,
   },
-  tabInactive: {
-  backgroundColor: '#8ebad3', // Màu nền chung khi chưa chọn
-},
-  tabActive: {
-    backgroundColor: '#007bff',
-  },
-  tabText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  form: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 10,
-    elevation: 2,
-  },
-  formTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#007bff',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  label: {
-    marginBottom: 4,
-    fontWeight: '500',
-    fontSize: 14,
-  },
+  tabActive: { backgroundColor: '#007bff' },
+  tabText: { fontWeight: 'bold', color: '#333' },
+  tabTextActive: { color: '#fff' },
+  label: { marginTop: 10, marginBottom: 4, fontSize: 14, fontWeight: '500' },
   input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
     marginBottom: 12,
-    backgroundColor: '#fff',
   },
   submitBtn: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#28a745',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
   },
-  btnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  link: {
-    color: '#007bff',
-    textAlign: 'right',
-    marginBottom: 12,
-    textDecorationLine: 'underline',
-  },
-  linkBtn: {
-    alignItems: 'flex-end',
-  },
+  btnText: { color: '#fff', fontWeight: 'bold' },
+  forgotLink: { color: '#007bff', fontSize: 14, marginTop: 10, marginLeft:240 },
   radioGroup: {
     flexDirection: 'row',
     gap: 20,
@@ -314,4 +267,12 @@ const styles = StyleSheet.create({
   radioLabel: {
     fontSize: 14,
   },
+  sectionTitle: {
+  fontSize: 20,              // hoặc lớn hơn tùy ý
+  fontWeight: '800',         // mạnh hơn 'bold', gần như in đậm tuyệt đối
+  color: '#0c0f11ff',
+  marginBottom: 10,
+  textAlign: 'center',
+},
+
 });

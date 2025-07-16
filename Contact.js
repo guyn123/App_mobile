@@ -12,20 +12,19 @@ import {
 import { FontAwesome5 } from '@expo/vector-icons';
 
 export default function ContactCC() {
-  const [name, setName] = useState('');
+  const [tenKhachHang, setTenKhachHang] = useState('');
   const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
+  const [noiDungTraLoi, setNoiDungTraLoi] = useState('');
 
   const handleSend = () => {
     alert('Cảm ơn bạn đã gửi liên hệ!');
+    // console.log({ tenKhachHang, email, noiDungTraLoi });
   };
 
   const handleReset = () => {
-    setName('');
+    setTenKhachHang('');
     setEmail('');
-    setSubject('');
-    setMessage('');
+    setNoiDungTraLoi('');
   };
 
   return (
@@ -43,19 +42,18 @@ export default function ContactCC() {
         <View style={styles.formContainer}>
           <Text style={styles.formTitle}>GỬI THÔNG TIN LIÊN HỆ ĐẾN TRUNG TÂM SỰ KIỆN</Text>
 
-          <InputField icon="user" placeholder="Họ tên (*)" value={name} onChangeText={setName} />
-          <InputField icon="envelope" placeholder="Email (*)" value={email} onChangeText={setEmail} />
-          <InputField icon="tag" placeholder="Tiêu đề liên hệ (*)" value={subject} onChangeText={setSubject} />
+          <InputField icon="user" placeholder="Tên khách hàng (*)" value={tenKhachHang} onChangeText={setTenKhachHang} />
+          <InputField icon="envelope" placeholder="Email liên hệ (*)" value={email} onChangeText={setEmail} />
           <InputField
             icon="comment-alt"
-            placeholder="Nội dung (*)"
-            value={message}
-            onChangeText={setMessage}
+            placeholder="Nội dung cần hỗ trợ (*)"
+            value={noiDungTraLoi}
+            onChangeText={setNoiDungTraLoi}
             multiline={true}
           />
 
           <Text style={styles.note}>
-            (*): là các phần quý khách hàng bắt buộc phải điền. Xin cảm ơn!
+            (*): là các trường bắt buộc. Xin vui lòng điền đầy đủ thông tin.
           </Text>
 
           <View style={styles.buttonRow}>

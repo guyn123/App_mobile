@@ -11,53 +11,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-/**
- * Thông tin Profile – hiển thị
- * 1. Trang chính (avatar + các mục)
- * 2. Trang con: Thông tin cá nhân / Đổi mật khẩu / Lịch sử giao dịch
- *    – Lịch sử giao dịch có 2 tầng: danh sách & chi tiết giao dịch
- */
-export default function ThongtinProfile({ onLogout, username = 'Lê Anh Quân' }) {
+export default function ThongtinProfile({ onLogout, username = 'Lê Anh Quân', externalOrders = [] }) {
   const [gender, setGender] = useState('');
   const [activeSection, setActiveSection] = useState(null); // null | 'personal' | 'account' | 'orders'
   const [selectedOrder, setSelectedOrder] = useState(null); // null | order object
+  const [cauHoiText, setCauHoiText] = useState('');
+  const [cauHoiDaGui, setCauHoiDaGui] = useState({});
 
-  // Dummy dữ liệu đơn hàng
-  const orders = [
-    {
-      id: 'GD001',
-      category: 'tech',
-      title: 'Hội thảo AI',
-      bookingTime: '14/04/2025 | 23:15',
-      start: '15/04/2025 | 08:00',
-      end: '15/04/2025 | 17:00',
-      location: 'Hà Nội',
-      price: '150.000₫',
-      description: 'Sự kiện cập nhật xu hướng AI mới nhất.',
-      totalSeats: 100,
-      bookedSeats: 90,
-      maGhe: 49,
-      maVe: 'ABCXYZ',
-    },
-    {
-      id: 'GD002',
-      category: 'tech',
-      title: 'Triển lãm CNTT',
-      bookingTime: '10/07/2025 | 09:00',
-      start: '20/07/2025 | 09:00',
-      end: '22/07/2025 | 17:00',
-      location: 'TP.HCM',
-      price: '100.000₫',
-      description: 'Trưng bày sản phẩm và giải pháp CNTT tiên tiến.',
-      totalSeats: 200,
-      bookedSeats: 145,
-      maGhe: 46,
-      maVe: 'ABCXYZ',
-
-    },
-  ];
-
-  /* ---------------------------- COMPONENTS ---------------------------- */
   const Input = ({ label, placeholder, keyboardType, secureTextEntry }) => (
     <View style={styles.formGroup}>
       <Text style={styles.label}>{label}</Text>
@@ -87,19 +47,14 @@ export default function ThongtinProfile({ onLogout, username = 'Lê Anh Quân' }
     </TouchableOpacity>
   );
 
-  /** Back button xử lý hai trường hợp
-   * 1. Đang ở trang chi tiết order -> quay về danh sách orders
-   * 2. Đang ở trang con khác -> quay về trang chính
-   */
   const handleBack = () => {
     if (selectedOrder) {
-      setSelectedOrder(null); // quay lại danh sách
+      setSelectedOrder(null);
     } else {
-      setActiveSection(null); // quay lại trang chính
+      setActiveSection(null);
     }
   };
 
-  /* ---------------------------- RENDER ---------------------------- */
   const renderSectionWrapper = (title, children) => (
     <View style={styles.sectionContainer}>
       <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
@@ -112,39 +67,92 @@ export default function ThongtinProfile({ onLogout, username = 'Lê Anh Quân' }
 
   const renderOrders = () => {
     if (selectedOrder) {
-      // # Chi tiết giao dịch
+      const now = new Date();
+      const start = new Date(selectedOrder.start);
+      const end = new Date(selectedOrder.end);
+      const isOngoingOrEnded = now >= start;
+
       return renderSectionWrapper('CHI TIẾT GIAO DỊCH', (
-        <View style={styles.orderDetailBox}>
-          <Text style={styles.orderTitle}>{selectedOrder.title}</Text>
-          <Text style={styles.orderSubInfo}>Mã giao dịch: {selectedOrder.id}</Text>
-          <Text style={styles.orderSubInfo}>Đặt lúc: {selectedOrder.bookingTime}</Text>
-          <Text style={styles.orderSubInfo}>Địa điểm: {selectedOrder.location}</Text>
-          <Text style={styles.orderSubInfo}>Bắt đầu: {selectedOrder.start}</Text>
-          <Text style={styles.orderSubInfo}>Kết thúc: {selectedOrder.end}</Text>
-          <Text style={styles.orderSubInfo}>Mã Ghế: {selectedOrder.maGhe}</Text>
-          <Text style={styles.orderSubInfo}>Mô tả: {selectedOrder.description}</Text>
-          
-          <Text style={[styles.ordermaVe, { marginTop: 12,textAlign: 'center',fontSize: 20, }]}>Mã Vé: {selectedOrder.maVe}</Text>
-          <Text style={[styles.orderPrice, { marginTop: 12,textAlign: 'center' }]}>Tổng tiền: {selectedOrder.price}</Text>
-          
-        </View>
+        <>
+          <View style={styles.orderDetailBox}>
+            <Text style={styles.orderTitle}>{selectedOrder.title}</Text>
+            <Text style={styles.orderSubInfo}>Mã giao dịch: {selectedOrder.id}</Text>
+            <Text style={styles.orderSubInfo}>Đặt lúc: {selectedOrder.bookingTime}</Text>
+            <Text style={styles.orderSubInfo}>Địa điểm: {selectedOrder.location}</Text>
+            <Text style={styles.orderSubInfo}>Bắt đầu: {selectedOrder.start}</Text>
+            <Text style={styles.orderSubInfo}>Kết thúc: {selectedOrder.end}</Text>
+            <Text style={styles.orderSubInfo}>Mã Ghế: {selectedOrder.maGhe}</Text>
+            <Text style={styles.orderSubInfo}>Mô tả: {selectedOrder.description}</Text>
+            <Text style={[styles.ordermaVe, { marginTop: 12, textAlign: 'center', fontSize: 20 }]}>Mã Vé: {selectedOrder.maVe}</Text>
+            <Text style={[styles.orderPrice, { marginTop: 12, textAlign: 'center' }]}>Tổng tiền: {selectedOrder.price}</Text>
+          </View>
+
+          {!isOngoingOrEnded && !cauHoiDaGui[selectedOrder.id] && (
+            <View style={styles.questionContainer}>
+<Text
+  style={{
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#0c0f13ff',
+    textAlign: 'left',
+    marginBottom: 10,
+    marginTop: 50,
+  }}
+>
+  ❓ Gửi câu hỏi cho sự kiện này:
+</Text>
+
+              <TextInput
+                style={[styles.input, { minHeight: 60, textAlignVertical: 'top' }]}
+                multiline
+                placeholder="Nhập nội dung câu hỏi..."
+                value={cauHoiText}
+                onChangeText={setCauHoiText}
+              />
+              <TouchableOpacity
+                style={[styles.saveBtn, { marginTop: 10 }]}
+                onPress={() => {
+                  if (!cauHoiText.trim()) {
+                    Alert.alert('Lỗi', 'Vui lòng nhập nội dung câu hỏi.');
+                    return;
+                  }
+                  setCauHoiDaGui({ ...cauHoiDaGui, [selectedOrder.id]: true });
+                  setCauHoiText('');
+                  Alert.alert('Thành công', 'Câu hỏi đã được gửi!');
+                }}>
+                <Text style={styles.btnText}>Gửi câu hỏi</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {cauHoiDaGui[selectedOrder.id] && (
+            <Text style={[styles.label, { textAlign: 'center', marginTop: 12, color: '#28a745' }]}>✅ Bạn đã gửi câu hỏi cho sự kiện này.</Text>
+          )}
+        </>
       ));
     }
-    // # Danh sách giao dịch
+
     return renderSectionWrapper('LỊCH SỬ GIAO DỊCH', (
       <>
-        {orders.map(order => (
-          <TouchableOpacity key={order.id} style={styles.orderCard} onPress={() => setSelectedOrder(order)}>
-            <View style={styles.orderLeft}>
-              <Text style={styles.orderTitle}>{order.title}</Text>
-              <Text style={styles.orderSubInfo}>Đặt lúc: {order.bookingTime}</Text>
-              <Text style={styles.orderSubInfo}>{order.location}</Text>
-            </View>
-            <View style={styles.orderRight}>
-              <Text style={styles.orderPrice}>{order.price}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {externalOrders.length === 0 ? (
+          <Text style={{ textAlign: 'center', marginTop: 16, color: '#999' }}>Bạn chưa có giao dịch nào.</Text>
+        ) : (
+          externalOrders.map(order => (
+            <TouchableOpacity
+              key={order.id}
+              style={styles.orderCard}
+              onPress={() => setSelectedOrder(order)}>
+              <View style={styles.orderLeft}>
+                <Text style={styles.orderTitle}>{order.title}</Text>
+                <Text style={styles.orderSubInfo}>Đặt lúc: {order.bookingTime}</Text>
+                <Text style={styles.orderSubInfo}>{order.location}</Text>
+              </View>
+              <View style={styles.orderRight}>
+                <Text style={styles.orderPrice}>{order.price}</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
       </>
     ));
   };
@@ -164,7 +172,9 @@ export default function ThongtinProfile({ onLogout, username = 'Lê Anh Quân' }
             <Input label="Email" placeholder="email@example.com" keyboardType="email-address" />
             <Input label="Số điện thoại" placeholder="098xxxxxxx" keyboardType="phone-pad" />
             <Input label="Địa chỉ" placeholder="Số nhà, đường, phường..." />
-            <TouchableOpacity style={styles.saveBtn}><Text style={styles.btnText}>Lưu thông tin</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.saveBtn}>
+              <Text style={styles.btnText}>Lưu thông tin</Text>
+            </TouchableOpacity>
           </>
         ));
       case 'account':
@@ -173,7 +183,9 @@ export default function ThongtinProfile({ onLogout, username = 'Lê Anh Quân' }
             <Input label="Mật khẩu hiện tại" secureTextEntry />
             <Input label="Mật khẩu mới" secureTextEntry />
             <Input label="Nhập lại mật khẩu mới" secureTextEntry />
-            <TouchableOpacity style={styles.saveBtn}><Text style={styles.btnText}>Đổi mật khẩu</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.saveBtn}>
+              <Text style={styles.btnText}>Đổi mật khẩu</Text>
+            </TouchableOpacity>
           </>
         ));
       case 'orders':
@@ -204,6 +216,8 @@ export default function ThongtinProfile({ onLogout, username = 'Lê Anh Quân' }
 
   return <ScrollView style={styles.container}>{renderContent()}</ScrollView>;
 }
+
+// ✅ Giữ nguyên toàn bộ phần styles như trước (không thay đổi)
 
 /* ---------------------------- STYLES ---------------------------- */
 const styles = StyleSheet.create({

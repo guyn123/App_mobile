@@ -13,10 +13,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
-export default function EventE() {
+export default function EventE({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
 
@@ -119,7 +120,6 @@ export default function EventE() {
             <Text style={styles.dropdownText}>{selectedCityLabel}</Text>
           </TouchableOpacity>
 
-          {/* Thành phố Modal */}
           <Modal visible={isCityModalVisible} transparent animationType="fade">
             <View style={styles.modalOverlay}>
               <View style={styles.modalBox}>
@@ -140,7 +140,6 @@ export default function EventE() {
             </View>
           </Modal>
 
-          {/* Modal phóng ảnh */}
           <Modal visible={!!selectedImage} transparent animationType="fade">
             <TouchableOpacity style={styles.imageModalOverlay} activeOpacity={1} onPressOut={() => setSelectedImage(null)}>
               <View style={styles.imageModalBox}>
@@ -160,41 +159,58 @@ export default function EventE() {
             scrollEnabled={false}
             contentContainerStyle={styles.eventList}
             columnWrapperStyle={{ justifyContent: 'space-between' }}
-            renderItem={({ item }) => (
-              <View style={styles.card}>
-                <TouchableOpacity onPress={() => setSelectedImage(item.anhSuKien)}>
-                  <Image source={item.anhSuKien} style={styles.eventImage} />
-                </TouchableOpacity>
-                <View style={styles.cardContent}>
-                  <Text style={styles.eventTime}>🕒 {new Date(item.ngayBatDau).toLocaleString('vi-VN')}</Text>
-                  <Text style={styles.eventTime}>🕒 {new Date(item.ngayKetThuc).toLocaleString('vi-VN')}</Text>
-                  <Text style={styles.eventTitle}>{item.tenSuKien}</Text>
-                  <Text style={styles.eventLocation}>📍 {item.diaDiem}</Text>
-                  <Text style={styles.eventPrice}>{parseInt(item.phiThamGia).toLocaleString()}₫</Text>
-                  <View style={styles.eventButtons}>
-                    <TouchableOpacity
-                      style={styles.detailButton}
-                      onPress={() => navigation.navigate('EventDetail', { event: item })}
-                    >
-                      <Text style={styles.buttonText}>Chi tiết</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.registerButton}
-                      onPress={() => navigation.navigate('DKEvent', { id: item.maSuKien })}
-                    >
-                      <Text style={styles.buttonText}>Đăng ký</Text>
-                    </TouchableOpacity>
+            renderItem={({ item }) => {
+              const now = new Date();
+              const start = new Date(item.ngayBatDau);
+              const end = new Date(item.ngayKetThuc);
+              const isEnded = now > end;
+              const isHappening = now >= start && now <= end;
+
+              return (
+                <View style={styles.card}>
+                  <TouchableOpacity onPress={() => setSelectedImage(item.anhSuKien)}>
+                    <Image source={item.anhSuKien} style={styles.eventImage} />
+                  </TouchableOpacity>
+                  <View style={styles.cardContent}>
+                    <Text style={styles.eventTime}>🕒 {new Date(item.ngayBatDau).toLocaleString('vi-VN')}</Text>
+                    <Text style={styles.eventTime}>🕒 {new Date(item.ngayKetThuc).toLocaleString('vi-VN')}</Text>
+                    <Text style={styles.eventTitle}>{item.tenSuKien}</Text>
+                    <Text style={styles.eventLocation}>📍 {item.diaDiem}</Text>
+                    <Text style={styles.eventPrice}>{parseInt(item.phiThamGia).toLocaleString()}₫</Text>
+                    <View style={styles.eventButtons}>
+                      <TouchableOpacity
+                        style={styles.detailButton}
+                        onPress={() => navigation.navigate('EventDetail', { event: item })}
+                      >
+                        <Text style={styles.buttonText}>Chi tiết</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.registerButton}
+                        onPress={() => {
+                          if (!isLoggedIn) {
+                            Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký!');
+                          } else if (isEnded) {
+                            Alert.alert('Không thể đăng ký', 'Sự kiện đã kết thúc!');
+                          } else if (isHappening) {
+                            Alert.alert('Không thể đăng ký', 'Sự kiện đang diễn ra!');
+                          } else {
+                            navigation.navigate('DKEvent', { id: item.maSuKien });
+                          }
+                        }}
+                      >
+                        <Text style={styles.buttonText}>Đăng ký</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-              </View>
-            )}
+              );
+            }}
           />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-// Styles giữ nguyên như cũ (không thay đổi cấu trúc bạn yêu cầu)
 
 
 

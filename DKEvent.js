@@ -3,8 +3,16 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } fr
 import { useRoute } from '@react-navigation/native';
 import { eventList } from './src/data/eventData';
 
-export default function DKEvent() {
-  const route = useRoute();
+const generateMaDiemDanh = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+export default function DKEvent({ route, username, addOrder }) {
   const { id } = route.params;
   const event = eventList.find(e => e.maSuKien === id);
 
@@ -13,11 +21,23 @@ export default function DKEvent() {
   const [method, setMethod] = useState(null);
   const [countdown, setCountdown] = useState(180);
   const [paid, setPaid] = useState(false);
-  const ticketCode = 'VE20250712105214';
+  const [maDiemDanh, setMaDiemDanh] = useState('');
 
   const seats = Array.from({ length: event.luongChoNgoi }, (_, i) => i + 1);
-  const bookedSeats = []; // Có thể load từ database nếu có
+  const bookedSeats = []; // có thể mở rộng
 
+  const now = new Date();
+const startTime = new Date(event.ngayBatDau);
+const endTime = new Date(event.ngayKetThuc);
+
+const isEventEnded = now > endTime;
+const isEventOngoing = now >= startTime && now <= endTime;
+
+if (isEventEnded || isEventOngoing) {
+  Alert.alert('Không thể đăng ký', isEventEnded ? 'Sự kiện đã kết thúc.' : 'Sự kiện đang diễn ra, không thể đăng ký.');
+  navigation.goBack(); // quay về trang trước
+  return null;
+}
   useEffect(() => {
     let timer;
     if (step === 4 && countdown > 0 && !paid) {
@@ -30,6 +50,30 @@ export default function DKEvent() {
     }
     return () => clearTimeout(timer);
   }, [step, countdown, paid]);
+
+  const handlePaid = () => {
+    const newCode = generateMaDiemDanh();
+    setMaDiemDanh(newCode);
+    setPaid(true);
+
+    const order = {
+      id: `GD${Math.floor(Math.random() * 100000)}`,
+      category: event.tenDanhMuc,
+      title: event.tenSuKien,
+      bookingTime: new Date().toLocaleString('vi-VN'),
+      start: new Date(event.ngayBatDau).toLocaleString('vi-VN'),
+      end: new Date(event.ngayKetThuc).toLocaleString('vi-VN'),
+      location: event.diaDiem,
+      price: parseInt(event.phiThamGia).toLocaleString() + '₫',
+      description: event.moTa,
+      totalSeats: event.luongChoNgoi,
+      bookedSeats: event.soNguoiDaDangKy + 1,
+      maGhe: selectedSeat,
+      maVe: newCode,
+    };
+
+    addOrder(order);
+  };
 
   const toCurrency = v => parseInt(v).toLocaleString() + ' ₫';
 
@@ -45,7 +89,6 @@ export default function DKEvent() {
         </View>
       )}
 
-      {/* Chọn chỗ ngồi */}
       {step === 2 && (
         <View style={styles.box}>
           <Text style={styles.sectionTitle}>Sơ đồ chỗ ngồi</Text>
@@ -65,8 +108,8 @@ export default function DKEvent() {
               const bgColor = isBooked
                 ? '#f44336'
                 : isSelected
-                ? '#f0ad4e'
-                : '#4CAF50';
+                  ? '#f0ad4e'
+                  : '#4CAF50';
 
               return (
                 <TouchableOpacity
@@ -89,12 +132,10 @@ export default function DKEvent() {
         </View>
       )}
 
-      {/* Thanh toán */}
       {step === 3 && (
         <View style={styles.box}>
           <Text style={styles.sectionTitle}>Thông tin đặt vé</Text>
-          <Text>Họ tên: Nguyễn Văn A</Text>
-          <Text>Số điện thoại: 0987654321</Text>
+          <Text>Họ tên: {username}</Text>
           <Text>Ghế: {selectedSeat}</Text>
           <Text>Tổng tiền: {toCurrency(event.phiThamGia)}</Text>
           <Text style={{ marginTop: 8, fontWeight: 'bold' }}>Phương thức thanh toán:</Text>
@@ -115,7 +156,6 @@ export default function DKEvent() {
         </View>
       )}
 
-      {/* Mã QR */}
       {step === 4 && !paid && (
         <View style={styles.box}>
           <Text style={styles.sectionTitle}>QR Thanh toán</Text>
@@ -125,30 +165,29 @@ export default function DKEvent() {
           />
           <Text>Ngân hàng: MB Bank</Text>
           <Text>Số tài khoản: 123456789</Text>
-          <Text>Nội dung: Thanh toan ve {ticketCode}</Text>
+          <Text>Nội dung: Thanh toan ve (mã tự động)</Text>
           <Text>Tổng tiền: {toCurrency(event.phiThamGia)}</Text>
           <Text style={{ marginTop: 8 }}>⏰ Còn lại: {countdown}s</Text>
           <TouchableOpacity
             style={[styles.button, { backgroundColor: '#28a745' }]}
-            onPress={() => setPaid(true)}>
+            onPress={handlePaid}>
             <Text style={styles.buttonText}>Tôi đã thanh toán</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Hiển thị vé */}
       {paid && (
         <View style={styles.ticketBox}>
           <Text style={styles.ticketIcon}>🎫</Text>
           <Text style={styles.ticketTitle}>VÉ THAM DỰ</Text>
           <View style={styles.ticketContent}>
             <Text style={styles.ticketText}>Sự kiện: {event.tenSuKien}</Text>
-            <Text style={styles.ticketText}>Họ tên: Nguyễn Văn A</Text>
+            <Text style={styles.ticketText}>Họ tên: {username}</Text>
             <Text style={styles.ticketText}>Ghế: {selectedSeat}</Text>
             <Text style={styles.ticketText}>Phương thức: {method}</Text>
             <Text style={styles.ticketText}>Ngày đặt: {new Date().toLocaleString('vi-VN')}</Text>
             <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 20, marginTop: 20 }}>
-              🔖 Mã vé: <Text style={styles.code}>{ticketCode}</Text>
+              🔖 Mã điểm danh: <Text style={styles.code}>{maDiemDanh}</Text>
             </Text>
           </View>
         </View>

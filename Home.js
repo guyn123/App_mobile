@@ -11,10 +11,11 @@ import {
   View,
   Dimensions,
   Modal,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-export default function HomeS() {
+export default function HomeS({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
 
@@ -75,46 +76,64 @@ export default function HomeS() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sự kiện nổi bật</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {eventList.slice(0, 5).map(event => (
-              <View
-                key={event.maSuKien}
-                style={{
-                  width: screenWidth * 0.9,
-                  backgroundColor: '#fff',
-                  borderRadius: 12,
-                  padding: 14,
-                  marginRight: 16,
-                  shadowColor: '#000',
-                  shadowOpacity: 0.1,
-                  shadowRadius: 6,
-                  elevation: 3,
-                }}>
-                <TouchableOpacity onPress={() => {
-                  setSelectedImage(event.anhSuKien);
-                  setModalVisible(true);
-                }}>
-                  <Image source={event.anhSuKien} style={{ width: '100%', height: 180, borderRadius: 10 }} />
-                </TouchableOpacity>
-                <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>{event.tenSuKien}</Text>
-                <Text style={{ fontSize: 14, color: '#555', marginTop: 8 }}>🕒 {new Date(event.ngayBatDau).toLocaleString('vi-VN')}</Text>
-                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>🕒 {new Date(event.ngayKetThuc).toLocaleString('vi-VN')}</Text>
-                <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>📍 {event.diaDiem}</Text>
-                <Text style={{ marginTop: 4, fontWeight: 'bold', color: '#e91e63' }}>💵 {parseInt(event.phiThamGia).toLocaleString()}₫</Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
-                  <TouchableOpacity
-                    style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 6, flex: 1, marginRight: 8 }}
-                    onPress={() => navigation.navigate('EventDetail', { event })}>
-                    <Text style={{ color: '#fff', textAlign: 'center' }}>Chi tiết</Text>
+            {eventList.slice(0, 5).map(event => {
+              const now = new Date();
+              const start = new Date(event.ngayBatDau);
+              const end = new Date(event.ngayKetThuc);
+              const isEnded = now > end;
+              const isHappening = now >= start && now <= end;
+
+              return (
+                <View
+                  key={event.maSuKien}
+                  style={{
+                    width: screenWidth * 0.9,
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    padding: 14,
+                    marginRight: 16,
+                    shadowColor: '#000',
+                    shadowOpacity: 0.1,
+                    shadowRadius: 6,
+                    elevation: 3,
+                  }}>
+                  <TouchableOpacity onPress={() => {
+                    setSelectedImage(event.anhSuKien);
+                    setModalVisible(true);
+                  }}>
+                    <Image source={event.anhSuKien} style={{ width: '100%', height: 180, borderRadius: 10 }} />
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{ backgroundColor: '#28a745', padding: 10, borderRadius: 6, flex: 1 }}
-                    onPress={() => navigation.navigate('DKEvent', { id: event.maSuKien })}
-                  >
-                    <Text style={{ color: '#fff', textAlign: 'center' }}>Đăng ký</Text>
-                  </TouchableOpacity>
+                  <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>{event.tenSuKien}</Text>
+                  <Text style={{ fontSize: 14, color: '#555', marginTop: 8 }}>🕒 {new Date(event.ngayBatDau).toLocaleString('vi-VN')}</Text>
+                  <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>🕒 {new Date(event.ngayKetThuc).toLocaleString('vi-VN')}</Text>
+                  <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>📍 {event.diaDiem}</Text>
+                  <Text style={{ marginTop: 4, fontWeight: 'bold', color: '#e91e63' }}>💵 {parseInt(event.phiThamGia).toLocaleString()}₫</Text>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 6, flex: 1, marginRight: 8 }}
+                      onPress={() => navigation.navigate('EventDetail', { event })}>
+                      <Text style={{ color: '#fff', textAlign: 'center' }}>Chi tiết</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#28a745', padding: 10, borderRadius: 6, flex: 1 }}
+                      onPress={() => {
+                        if (!isLoggedIn) {
+                          Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký sự kiện!');
+                        } else if (isEnded) {
+                          Alert.alert('Không thể đăng ký', 'Sự kiện đã kết thúc.');
+                        } else if (isHappening) {
+                          Alert.alert('Không thể đăng ký', 'Sự kiện đang diễn ra.');
+                        } else {
+                          navigation.navigate('DKEvent', { id: event.maSuKien });
+                        }
+                      }}
+                    >
+                      <Text style={{ color: '#fff', textAlign: 'center' }}>Đăng ký</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </ScrollView>
         </View>
 
@@ -184,7 +203,6 @@ const FaqItem = ({ question, answer }) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f8f8f8' },
