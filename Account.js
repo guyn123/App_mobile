@@ -1,4 +1,3 @@
-// ✅ FILE: Account.js (đã hoàn chỉnh và lưu đầy đủ thông tin đăng ký)
 import React, { useState } from 'react';
 import {
   SafeAreaView,
@@ -12,8 +11,10 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function AccountA({ setIsLoggedIn, setUsername, users, setUsers }) {
+export default function AccountA({ setIsLoggedIn, setUsername }) {
   const [activeTab, setActiveTab] = useState('login');
   const [tenDangNhap, setTenDangNhap] = useState('');
   const [matKhau, setMatKhau] = useState('');
@@ -26,23 +27,42 @@ export default function AccountA({ setIsLoggedIn, setUsername, users, setUsers }
   const [diaChi, setDiaChi] = useState('');
   const [forgotPassword, setForgotPassword] = useState(false);
   const [showResetForm, setShowResetForm] = useState(false);
+  const [resetToken, setResetToken] = useState('');
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    const found = users.find(
-      (u) => u.username === tenDangNhap && u.password === matKhau
-    );
-    if (found) {
-      setIsLoggedIn(true);
-      setUsername(tenDangNhap);
-      Alert.alert('Thành công', 'Đăng nhập thành công!');
-      navigation.navigate('Quaylai');
-    } else {
-      Alert.alert('Thất bại', 'Sai tên đăng nhập hoặc mật khẩu');
+  // Base URL của backend (thay đổi theo môi trường của bạn)
+  const API_BASE_URL = 'http://172.17.153.233:8084/api/auth'; // Thay bằng địa chỉ backend của bạn
+
+  const handleLogin = async () => {
+    if (!tenDangNhap || !matKhau) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ tên đăng nhập và mật khẩu');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/login`, {
+        username: tenDangNhap,
+        password: matKhau,
+      });
+
+      if (response.status === 200) {
+        // Giả sử backend trả về token trong cookie hoặc body
+        const { token } = response.data; // Nếu token được trả trong body
+        if (token) {
+          await AsyncStorage.setItem('token', token); // Lưu token
+          setIsLoggedIn(true);
+          setUsername(tenDangNhap);
+          Alert.alert('Thành công', 'Đăng nhập thành công!');
+          navigation.navigate('Quaylai');
+        }
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Sai tên đăng nhập hoặc mật khẩu';
+      Alert.alert('Thất bại', errorMessage);
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!tenDangNhap || !matKhau || !xacNhanMatKhau || !hoTen || !gioiTinh || !soTuoi || !email || !phone || !diaChi) {
       Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
       return;
@@ -51,17 +71,91 @@ export default function AccountA({ setIsLoggedIn, setUsername, users, setUsers }
       Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
-    const exists = users.some(u => u.username === tenDangNhap);
-    if (exists) {
-      Alert.alert('Lỗi', 'Tên đăng nhập đã tồn tại');
+    if (parseInt(soTuoi) < 18 || parseInt(soTuoi) > 100) {
+      Alert.alert('Lỗi', 'Tuổi phải từ 18 đến 100');
       return;
     }
-    setUsers([
-      ...users,
-      { username: tenDangNhap, password: matKhau, hoTen, gioiTinh, soTuoi, email, phone, diaChi }
-    ]);
-    Alert.alert('Thành công', 'Đăng ký thành công!');
-    setActiveTab('login');
+    if (!/^\d{10}$/.test(phone)) {
+      Alert.alert('Lỗi', 'Số điện thoại phải có 10 chữ số');
+      return;
+    }
+    if (!/^(Nam|Nữ|Khác)$/.test(gioiTinh)) {
+      Alert.alert('Lỗi', 'Vui lòng chọn giới tính hợp lệ');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/register`, {
+        username: tenDangNhap,
+        password: matKhau,
+        confirmPassword: xacNhanMatKhau,
+        name: hoTen,
+        gender: gioiTinh,
+        age: parseInt(soTuoi),
+        email,
+        phone,
+        address: diaChi,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Thành công', response.data.message || 'Đăng ký thành công!');
+        setActiveTab('login');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Đăng ký thất bại';
+      Alert.alert('Lỗi', errorMessage);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/forgot_password`, {
+        identifier: email,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Thành công', 'Yêu cầu đặt lại mật khẩu đã được gửi!');
+        setShowResetForm(true);
+        // Giả sử backend gửi token qua email, cần nhập thủ công hoặc xử lý khác
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Gửi yêu cầu thất bại';
+      Alert.alert('Lỗi', errorMessage);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!matKhau || !xacNhanMatKhau) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu mới và xác nhận mật khẩu');
+      return;
+    }
+    if (matKhau !== xacNhanMatKhau) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/reset_password/${resetToken}`, {
+        newPassword: matKhau,
+
+        confirmNewPassword: xacNhanMatKhau,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Thành công', 'Mật khẩu đã được đặt lại!');
+        setForgotPassword(false);
+        setShowResetForm(false);
+        setResetToken('');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Đặt lại mật khẩu thất bại';
+      Alert.alert('Lỗi', errorMessage);
+    }
   };
 
   const RadioOption = ({ label, value }) => (
@@ -87,17 +181,32 @@ export default function AccountA({ setIsLoggedIn, setUsername, users, setUsers }
               showResetForm ? (
                 <>
                   <Text style={styles.sectionTitle}>Đặt lại mật khẩu</Text>
+                  <Text style={styles.label}>Token (Nhận từ email)</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập token"
+                    value={resetToken}
+                    onChangeText={setResetToken}
+                  />
                   <Text style={styles.label}>Mật khẩu mới</Text>
-                  <TextInput style={styles.input} placeholder="Nhập mật khẩu mới" secureTextEntry />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập mật khẩu mới"
+                    secureTextEntry
+                    value={matKhau}
+                    onChangeText={setMatKhau}
+                  />
                   <Text style={styles.label}>Xác nhận mật khẩu</Text>
-                  <TextInput style={styles.input} placeholder="Nhập lại mật khẩu" secureTextEntry />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập lại mật khẩu"
+                    secureTextEntry
+                    value={xacNhanMatKhau}
+                    onChangeText={setXacNhanMatKhau}
+                  />
                   <TouchableOpacity
                     style={styles.submitBtn}
-                    onPress={() => {
-                      Alert.alert('Thành công', 'Mật khẩu đã được đặt lại!');
-                      setForgotPassword(false);
-                      setShowResetForm(false);
-                    }}>
+                    onPress={handleResetPassword}>
                     <Text style={styles.btnText}>Đặt lại</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => { setForgotPassword(false); setShowResetForm(false); }}>
@@ -117,7 +226,7 @@ export default function AccountA({ setIsLoggedIn, setUsername, users, setUsers }
                   />
                   <TouchableOpacity
                     style={styles.submitBtn}
-                    onPress={() => setShowResetForm(true)}>
+                    onPress={handleForgotPassword}>
                     <Text style={styles.btnText}>Gửi yêu cầu</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setForgotPassword(false)}>
@@ -167,6 +276,7 @@ export default function AccountA({ setIsLoggedIn, setUsername, users, setUsers }
                     <View style={styles.radioGroup}>
                       <RadioOption label="Nam" value="Nam" />
                       <RadioOption label="Nữ" value="Nữ" />
+                      <RadioOption label="Khác" value="Khác" />
                     </View>
                     <Text style={styles.label}>Tuổi</Text>
                     <TextInput style={styles.input} value={soTuoi} onChangeText={setSoTuoi} keyboardType="numeric" />
@@ -242,7 +352,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   btnText: { color: '#fff', fontWeight: 'bold' },
-  forgotLink: { color: '#007bff', fontSize: 14, marginTop: 10, marginLeft:240 },
+  forgotLink: { color: '#007bff', fontSize: 14, marginTop: 10, marginLeft: 240 },
   radioGroup: {
     flexDirection: 'row',
     gap: 20,
@@ -268,11 +378,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   sectionTitle: {
-  fontSize: 20,              // hoặc lớn hơn tùy ý
-  fontWeight: '800',         // mạnh hơn 'bold', gần như in đậm tuyệt đối
-  color: '#0c0f11ff',
-  marginBottom: 10,
-  textAlign: 'center',
-},
-
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0c0f11ff',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
 });

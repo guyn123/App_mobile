@@ -1,3 +1,4 @@
+// ✅ FILE: DKEven.js 
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
 import { useRoute } from '@react-navigation/native';
