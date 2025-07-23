@@ -1,5 +1,4 @@
-import { eventList } from './src/data/eventData';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -13,15 +12,48 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
 
 export default function HomeS({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
+  const API_BASE = 'http://192.168.62.105:8084/api';
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Function to fetch and select 3 random events
+  const fetchFeaturedEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_BASE}/sukien/get/all`, {
+        params: { page: 0, size: 10 },
+      });
+      const events = response.data.content || [];
+      // Select 3 random events
+      const shuffled = events.sort(() => 0.5 - Math.random());
+      const selectedEvents = shuffled.slice(0, Math.min(3, events.length));
+      setFeaturedEvents(selectedEvents);
+      console.log('Featured events:', selectedEvents.map(e => e.maSuKien)); // Debug
+    } catch (error) {
+      console.error('Lỗi khi lấy sự kiện:', error.response?.data || error.message);
+      Alert.alert('Lỗi', 'Không thể tải sự kiện nổi bật.');
+      setFeaturedEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [API_BASE]);
+
+  // Fetch events when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      fetchFeaturedEvents();
+    }, [fetchFeaturedEvents])
+  );
 
   const handleSearch = () => {
     navigation.navigate('Event', { keyword: searchKeyword });
@@ -30,6 +62,24 @@ export default function HomeS({ isLoggedIn, username }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
+        <View style={styles.header}>
+          <Image
+            source={require('./assets/img/banners/original.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm kiếm sự kiện..."
+            placeholderTextColor="#666"
+            value={searchKeyword}
+            onChangeText={setSearchKeyword}
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+            <Text style={styles.searchButtonText}>Tìm</Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView horizontal pagingEnabled style={styles.slider}>
           <Image
             source={require('./assets/img/nghien-cuu-khoa-hoc-sinh-vien-truong-dai-hoc-cmc-19.jpg')}
@@ -75,66 +125,88 @@ export default function HomeS({ isLoggedIn, username }) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sự kiện nổi bật</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {eventList.slice(0, 5).map(event => {
-              const now = new Date();
-              const start = new Date(event.ngayBatDau);
-              const end = new Date(event.ngayKetThuc);
-              const isEnded = now > end;
-              const isHappening = now >= start && now <= end;
+          {loading ? (
+            <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 16, color: '#555' }}>
+              Đang tải sự kiện...
+            </Text>
+          ) : featuredEvents.length === 0 ? (
+            <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 16, color: '#555' }}>
+              Không có sự kiện nào để hiển thị.
+            </Text>
+          ) : (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {featuredEvents.map(event => {
+                const now = new Date();
+                const start = new Date(event.ngayBatDau);
+                const end = new Date(event.ngayKetThuc);
+                const isEnded = now > end;
+                const isHappening = now >= start && now <= end;
 
-              return (
-                <View
-                  key={event.maSuKien}
-                  style={{
-                    width: screenWidth * 0.9,
-                    backgroundColor: '#fff',
-                    borderRadius: 12,
-                    padding: 14,
-                    marginRight: 16,
-                    shadowColor: '#000',
-                    shadowOpacity: 0.1,
-                    shadowRadius: 6,
-                    elevation: 3,
-                  }}>
-                  <TouchableOpacity onPress={() => {
-                    setSelectedImage(event.anhSuKien);
-                    setModalVisible(true);
-                  }}>
-                    <Image source={event.anhSuKien} style={{ width: '100%', height: 180, borderRadius: 10 }} />
-                  </TouchableOpacity>
-                  <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>{event.tenSuKien}</Text>
-                  <Text style={{ fontSize: 14, color: '#555', marginTop: 8 }}>🕒 {new Date(event.ngayBatDau).toLocaleString('vi-VN')}</Text>
-                  <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>🕒 {new Date(event.ngayKetThuc).toLocaleString('vi-VN')}</Text>
-                  <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>📍 {event.diaDiem}</Text>
-                  <Text style={{ marginTop: 4, fontWeight: 'bold', color: '#e91e63' }}>💵 {parseInt(event.phiThamGia).toLocaleString()}₫</Text>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
-                    <TouchableOpacity
-                      style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 6, flex: 1, marginRight: 8 }}
-                      onPress={() => navigation.navigate('EventDetail', { event })}>
-                      <Text style={{ color: '#fff', textAlign: 'center' }}>Chi tiết</Text>
+                return (
+                  <View
+                    key={event.maSuKien}
+                    style={{
+                      width: screenWidth * 0.9,
+                      backgroundColor: '#fff',
+                      borderRadius: 12,
+                      padding: 14,
+                      marginRight: 16,
+                      shadowColor: '#000',
+                      shadowOpacity: 0.1,
+                      shadowRadius: 6,
+                      elevation: 3,
+                    }}>
+                    <TouchableOpacity onPress={() => {
+                      setSelectedImage({ uri: `${API_BASE}/sukien/get/img/${event.anhSuKien}` });
+                      setModalVisible(true);
+                    }}>
+                      <Image
+                        source={{ uri: `${API_BASE}/sukien/get/img/${event.anhSuKien}` }}
+                        style={{ width: '100%', height: 180, borderRadius: 10 }}
+                      />
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{ backgroundColor: '#28a745', padding: 10, borderRadius: 6, flex: 1 }}
-                      onPress={() => {
-                        if (!isLoggedIn) {
-                          Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký sự kiện!');
-                        } else if (isEnded) {
-                          Alert.alert('Không thể đăng ký', 'Sự kiện đã kết thúc.');
-                        } else if (isHappening) {
-                          Alert.alert('Không thể đăng ký', 'Sự kiện đang diễn ra.');
-                        } else {
-                          navigation.navigate('DKEvent', { id: event.maSuKien });
-                        }
-                      }}
-                    >
-                      <Text style={{ color: '#fff', textAlign: 'center' }}>Đăng ký</Text>
-                    </TouchableOpacity>
+                    <Text style={{ fontWeight: 'bold', fontSize: 18, marginTop: 8 }}>{event.tenSuKien}</Text>
+                    <Text style={{ fontSize: 14, color: '#555', marginTop: 8 }}>
+                      🕒 {new Date(event.ngayBatDau).toLocaleString('vi-VN')}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>
+                      🕒 {new Date(event.ngayKetThuc).toLocaleString('vi-VN')}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>📍 {event.diaDiem}</Text>
+                    <Text style={{ marginTop: 4, fontWeight: 'bold', color: '#e91e63' }}>
+                      💵 {parseInt(event.phiThamGia).toLocaleString()}₫
+                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                      <TouchableOpacity
+                        style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 6, flex: 1, marginRight: 8 }}
+                        onPress={() => navigation.navigate('EventDetail', { event })}
+                      >
+                        <Text style={{ color: '#fff', textAlign: 'center' }}>Chi tiết</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{ backgroundColor: '#28a745', padding: 10, borderRadius: 6, flex: 1 }}
+                        onPress={() => {
+                          if (!isLoggedIn) {
+                            Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký sự kiện!');
+                          } else if (isEnded) {
+                            Alert.alert('Không thể đăng ký', 'Sự kiện đã kết thúc.');
+                          } else if (isHappening) {
+                            Alert.alert('Không thể đăng ký', 'Sự kiện đang diễn ra.');
+                          } else if (event.trangThaiSuKien === 'Hết chỗ' || event.trangThaiSuKien === 'Hết hạn đăng ký') {
+                            Alert.alert('Không thể đăng ký', `Sự kiện ${event.trangThaiSuKien.toLowerCase()}!`);
+                          } else {
+                            navigation.navigate('DKEvent', { id: event.maSuKien });
+                          }
+                        }}
+                      >
+                        <Text style={{ color: '#fff', textAlign: 'center' }}>Đăng ký</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
-              );
-            })}
-          </ScrollView>
+                );
+              })}
+            </ScrollView>
+          )}
         </View>
 
         <View style={styles.section}>

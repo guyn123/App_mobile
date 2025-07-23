@@ -1,5 +1,3 @@
-import { eventList } from './src/data/eventData';
-import Slider from '@react-native-community/slider';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dimensions,
@@ -16,46 +14,107 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import Slider from '@react-native-community/slider';
+import axios from 'axios';
 
 export default function EventE({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
+  const API_BASE = 'http://192.168.62.105:8084/api';
 
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isCityModalVisible, setCityModalVisible] = useState(false);
-  const [selectedCityLabel, setSelectedCityLabel] = useState('Tất cả');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [maxPrice, setMaxPrice] = useState(5000000);
-  const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(null); // maDanhMuc or null
+  const [maxPrice, setMaxPrice] = useState(2000000);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [searchTrigger, setSearchTrigger] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [trangThai, setTrangThai] = useState('Sắp diễn ra'); // Single status or null
+  const [loading, setLoading] = useState(false);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/danhmucsukien/get/all`, {
+        params: { page: 0, size: 100 },
+      });
+      const fetchedCategories = response.data.content || [];
+      setCategories([{ maDanhMuc: null, tenDanhMuc: 'Tất cả' }, ...fetchedCategories]);
+    } catch (error) {
+      console.error('Lỗi khi lấy danh mục:', error.response?.data || error.message);
+      Alert.alert('Lỗi', 'Không thể tải danh mục sự kiện.');
+    }
+  }, [API_BASE]);
+
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: 0,
+        size: 20,
+        maDanhMuc: selectedCategory || null,
+        search: searchKeyword || null,
+        costStart: 0,
+        costEnd: maxPrice,
+      };
+      // Fetch all events, filter by trangThaiSuKien only for Đã kết thúc
+      if (trangThai === 'Đã kết thúc') {
+        params.trangThai = 'Đã kết thúc';
+      }
+      const response = await axios.get(`${API_BASE}/sukien/get/all`, {
+        params,
+        paramsSerializer: (params) => {
+          const searchParams = new URLSearchParams();
+          for (const key in params) {
+            if (params[key] !== null) {
+              searchParams.append(key, params[key]);
+            }
+          }
+          return searchParams.toString();
+        },
+      });
+      let fetchedEvents = response.data.content || [];
+      
+      // Filter events based on trangThai and date
+      const now = new Date();
+      fetchedEvents = fetchedEvents.filter((event) => {
+        const start = new Date(event.ngayBatDau);
+        const end = new Date(event.ngayKetThuc);
+        if (trangThai === 'Sắp diễn ra') {
+          return now < start && event.trangThaiSuKien !== 'Đã kết thúc';
+        } else if (trangThai === 'Đang diễn ra') {
+          return now >= start && now <= end && event.trangThaiSuKien !== 'Đã kết thúc';
+        } else if (trangThai === 'Đã kết thúc') {
+          return event.trangThaiSuKien === 'Đã kết thúc' || now > end;
+        }
+        return true; // Tất cả
+      });
+
+      console.log('Fetched events:', fetchedEvents); // Debug: Log events
+      console.log('Applied filters:', { selectedCategory, searchKeyword, trangThai, maxPrice }); // Debug: Log filters
+      setEvents(fetchedEvents);
+    } catch (error) {
+      console.error('Lỗi khi lấy sự kiện:', error.response?.data || error.message);
+      Alert.alert('Lỗi', 'Không thể tải danh sách sự kiện.');
+    } finally {
+      setLoading(false);
+    }
+  }, [API_BASE, selectedCategory, searchKeyword, trangThai, maxPrice]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   useFocusEffect(
     useCallback(() => {
       setSearchKeyword('');
-      setSearchTrigger(false);
-      setSelectedCategory('all');
-      setSelectedCity('all');
-      setSelectedCityLabel('Tất cả');
-      setMaxPrice(5000000);
+      setSelectedCategory(null);
+      setMaxPrice(2000000);
+      setTrangThai('Sắp diễn ra');
     }, [])
   );
-
-  const filteredEvents = eventList.filter((event) => {
-    const titleMatch = searchKeyword === '' || event.tenSuKien.toLowerCase().includes(searchKeyword.toLowerCase());
-    const cityMatch = selectedCity === 'all' || event.diaDiem.includes(selectedCity);
-    const categoryMatch = selectedCategory === 'all' || event.tenDanhMuc === selectedCategory;
-    const priceMatch = parseInt(event.phiThamGia) <= maxPrice;
-    return titleMatch && cityMatch && categoryMatch && priceMatch;
-  });
-
-  const cityList = [
-    { label: 'Tất cả', value: 'all' },
-    { label: 'Hà Nội', value: 'Hà Nội' },
-    { label: 'TP.HCM', value: 'TP.HCM' },
-    { label: 'Đà Nẵng', value: 'Đà Nẵng' },
-    { label: 'Huế', value: 'Huế' },
-  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -73,7 +132,7 @@ export default function EventE({ isLoggedIn, username }) {
             value={searchKeyword}
             onChangeText={setSearchKeyword}
           />
-          <TouchableOpacity style={styles.searchButton} onPress={() => setSearchTrigger(!searchTrigger)}>
+          <TouchableOpacity style={styles.searchButton} onPress={fetchEvents}>
             <Text style={styles.searchButtonText}>Tìm</Text>
           </TouchableOpacity>
         </View>
@@ -88,17 +147,14 @@ export default function EventE({ isLoggedIn, username }) {
         <View style={styles.section}>
           <Text style={styles.filterTitle}>Danh mục:</Text>
           <View style={styles.categoryList}>
-            {['all', 'music', 'tech', 'education', 'festival'].map((cat) => (
+            {categories.map((cat) => (
               <TouchableOpacity
-                key={cat}
-                style={[styles.categoryButton, selectedCategory === cat && styles.categoryButtonActive]}
-                onPress={() => setSelectedCategory(cat)}
+                key={cat.maDanhMuc || 'all'}
+                style={[styles.categoryButton, selectedCategory === cat.maDanhMuc && styles.categoryButtonActive]}
+                onPress={() => setSelectedCategory(cat.maDanhMuc)}
               >
-                <Text style={[styles.categoryText, selectedCategory === cat && styles.categoryTextActive]}>
-                  {cat === 'all' ? 'Tất cả' :
-                    cat === 'music' ? 'Âm nhạc' :
-                    cat === 'tech' ? 'Công nghệ' :
-                    cat === 'education' ? 'Giáo dục' : 'Lễ hội'}
+                <Text style={[styles.categoryText, selectedCategory === cat.maDanhMuc && styles.categoryTextActive]}>
+                  {cat.tenDanhMuc}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -108,123 +164,113 @@ export default function EventE({ isLoggedIn, username }) {
           <Slider
             style={{ width: '100%', height: 40 }}
             minimumValue={0}
-            maximumValue={5000000}
-            step={50000}
+            maximumValue={2000000}
+            step={10000}
             value={maxPrice}
             onValueChange={(value) => setMaxPrice(value)}
           />
           <Text>Giá tối đa: {maxPrice.toLocaleString()}₫</Text>
 
-          <Text style={styles.filterTitle}>Lọc theo thành phố:</Text>
-          <TouchableOpacity style={styles.dropdownButton} onPress={() => setCityModalVisible(true)}>
-            <Text style={styles.dropdownText}>{selectedCityLabel}</Text>
-          </TouchableOpacity>
-
-          <Modal visible={isCityModalVisible} transparent animationType="fade">
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalBox}>
-                {cityList.map((city) => (
-                  <TouchableOpacity
-                    key={city.value}
-                    style={styles.modalItem}
-                    onPress={() => {
-                      setSelectedCity(city.value);
-                      setSelectedCityLabel(city.label);
-                      setCityModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.modalItemText}>{city.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </Modal>
-
-          <Modal visible={!!selectedImage} transparent animationType="fade">
-            <TouchableOpacity style={styles.imageModalOverlay} activeOpacity={1} onPressOut={() => setSelectedImage(null)}>
-              <View style={styles.imageModalBox}>
-                {selectedImage && (
-                  <Image source={selectedImage} style={styles.imageModalImage} resizeMode="contain" />
-                )}
-              </View>
-            </TouchableOpacity>
-          </Modal>
+          <Text style={styles.filterTitle}>Lọc theo trạng thái:</Text>
+          <View style={styles.categoryList}>
+            {['Sắp diễn ra', 'Đang diễn ra', 'Đã kết thúc', 'Tất cả'].map((status) => (
+              <TouchableOpacity
+                key={status}
+                style={[styles.categoryButton, trangThai === status && styles.categoryButtonActive]}
+                onPress={() => setTrangThai(status)}
+              >
+                <Text style={[styles.categoryText, trangThai === status && styles.categoryTextActive]}>
+                  {status}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         <View style={styles.section}>
-          <FlatList
-            data={filteredEvents}
-            keyExtractor={(item) => item.maSuKien.toString()}
-            numColumns={2}
-            scrollEnabled={false}
-            contentContainerStyle={styles.eventList}
-            columnWrapperStyle={{ justifyContent: 'space-between' }}
-            renderItem={({ item }) => {
-              const now = new Date();
-              const start = new Date(item.ngayBatDau);
-              const end = new Date(item.ngayKetThuc);
-              const isEnded = now > end;
-              const isHappening = now >= start && now <= end;
+          {loading ? (
+            <Text style={{ textAlign: 'center', marginTop: 20 }}>Đang tải...</Text>
+          ) : (
+            <FlatList
+              data={events}
+              keyExtractor={(item) => item.maSuKien.toString()}
+              numColumns={2}
+              scrollEnabled={false}
+              contentContainerStyle={styles.eventList}
+              columnWrapperStyle={{ justifyContent: 'space-between' }}
+              renderItem={({ item }) => {
+                const now = new Date();
+                const start = new Date(item.ngayBatDau);
+                const end = new Date(item.ngayKetThuc);
+                const isEnded = now > end;
+                const isHappening = now >= start && now <= end;
 
-              return (
-                <View style={styles.card}>
-                  <TouchableOpacity onPress={() => setSelectedImage(item.anhSuKien)}>
-                    <Image source={item.anhSuKien} style={styles.eventImage} />
-                  </TouchableOpacity>
-                  <View style={styles.cardContent}>
-                    <Text style={styles.eventTime}>🕒 {new Date(item.ngayBatDau).toLocaleString('vi-VN')}</Text>
-                    <Text style={styles.eventTime}>🕒 {new Date(item.ngayKetThuc).toLocaleString('vi-VN')}</Text>
-                    <Text style={styles.eventTitle}>{item.tenSuKien}</Text>
-                    <Text style={styles.eventLocation}>📍 {item.diaDiem}</Text>
-                    <Text style={styles.eventPrice}>{parseInt(item.phiThamGia).toLocaleString()}₫</Text>
-                    <View style={styles.eventButtons}>
-                      <TouchableOpacity
-                        style={styles.detailButton}
-                        onPress={() => navigation.navigate('EventDetail', { event: item })}
-                      >
-                        <Text style={styles.buttonText}>Chi tiết</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.registerButton}
-                        onPress={() => {
-                          if (!isLoggedIn) {
-                            Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký!');
-                          } else if (isEnded) {
-                            Alert.alert('Không thể đăng ký', 'Sự kiện đã kết thúc!');
-                          } else if (isHappening) {
-                            Alert.alert('Không thể đăng ký', 'Sự kiện đang diễn ra!');
-                          } else {
-                            navigation.navigate('DKEvent', { id: item.maSuKien });
-                          }
-                        }}
-                      >
-                        <Text style={styles.buttonText}>Đăng ký</Text>
-                      </TouchableOpacity>
+                return (
+                  <View style={styles.card}>
+                    <TouchableOpacity onPress={() => setSelectedImage({ uri: `${API_BASE}/sukien/get/img/${item.anhSuKien}` })}>
+                      <Image
+                        source={{ uri: `${API_BASE}/sukien/get/img/${item.anhSuKien}` }}
+                        style={styles.eventImage}
+                      />
+                    </TouchableOpacity>
+                    <View style={styles.cardContent}>
+                      <Text style={styles.eventTime}>🕒 {new Date(item.ngayBatDau).toLocaleString('vi-VN')}</Text>
+                      <Text style={styles.eventTime}>🕒 {new Date(item.ngayKetThuc).toLocaleString('vi-VN')}</Text>
+                      <Text style={styles.eventTitle}>{item.tenSuKien}</Text>
+                      <Text style={styles.eventLocation}>📍 {item.diaDiem}</Text>
+                      <Text style={styles.eventPrice}>{parseInt(item.phiThamGia).toLocaleString()}₫</Text>
+                      <View style={styles.eventButtons}>
+                        <TouchableOpacity
+                          style={styles.detailButton}
+                          onPress={() => navigation.navigate('EventDetail', { event: item })}
+                        >
+                          <Text style={styles.buttonText}>Chi tiết</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.registerButton}
+                          onPress={() => {
+                            if (!isLoggedIn) {
+                              Alert.alert('Thông báo', 'Bạn cần đăng nhập để đăng ký!');
+                            } else if (isEnded) {
+                              Alert.alert('Không thể đăng ký', 'Sự kiện đã kết thúc!');
+                            } else if (isHappening) {
+                              Alert.alert('Không thể đăng ký', 'Sự kiện đang diễn ra!');
+                            } else if (item.trangThaiSuKien === 'Hết chỗ' || item.trangThaiSuKien === 'Hết hạn đăng ký') {
+                              Alert.alert('Không thể đăng ký', `Sự kiện ${item.trangThaiSuKien.toLowerCase()}!`);
+                            } else {
+                              navigation.navigate('DKEvent', { id: item.maSuKien });
+                            }
+                          }}
+                        >
+                          <Text style={styles.buttonText}>Đăng ký</Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-                </View>
-              );
-            }}
-          />
+                );
+              }}
+            />
+          )}
         </View>
       </ScrollView>
+
+      <Modal visible={!!selectedImage} transparent animationType="fade">
+        <TouchableOpacity style={styles.imageModalOverlay} activeOpacity={1} onPressOut={() => setSelectedImage(null)}>
+          <View style={styles.imageModalBox}>
+            {selectedImage && (
+              <Image source={selectedImage} style={styles.imageModalImage} resizeMode="contain" />
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
 
-
-
-
-// Styles
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#f8f8f8',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -233,7 +279,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#8ebad3',
   },
   logo: {
-width: 120, height: 50, marginRight: 10
+    width: 120,
+    height: 50,
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
@@ -255,12 +303,12 @@ width: 120, height: 50, marginRight: 10
   },
   slider: {
     height: 200,
-    backgroundColor: '#ccc'
+    backgroundColor: '#ccc',
   },
   sliderImage: {
-width: 450, 
-height: 200,
-resizeMode: 'cover'
+    width: 450,
+    height: 200,
+    resizeMode: 'cover',
   },
   section: {
     padding: 16,
@@ -292,46 +340,6 @@ resizeMode: 'cover'
   },
   categoryTextActive: {
     color: '#fff',
-  },
-  dropdownButton: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    marginTop: 10,
-    backgroundColor: '#fff',
-  },
-  dropdownText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalBox: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  modalItem: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-  },
-  modalItemText: {
-    fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
   },
   eventList: {
     paddingBottom: 12,
@@ -408,6 +416,3 @@ resizeMode: 'cover'
     height: '100%',
   },
 });
-
-
-

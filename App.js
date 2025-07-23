@@ -1,4 +1,3 @@
-// ✅ FILE: App.js
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,11 +9,14 @@ import HomeS from './Home';
 import EventE from './Event';
 import AboutA from './About';
 import ContactCC from './Contact';
-import ProfilePP from './Profile';
+import ProfilePP from './Profilechung/Profile';
 import AccountA from './Account';
 import EventDetail from './EventDetail';
 import DKEvent from './DKEvent';
 import SplashScreen from './SplashScreen';
+import PersonalInfo from './Profilechung/PersonalInfo';
+import ChangePassword from './Profilechung/ChangePassword';
+import OrderHistory from './Profilechung/OrderHistory';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -50,13 +52,13 @@ export default function App() {
         },
       })}
     >
-<Tab.Screen
-  name="Home"
-  children={() => (
-    <HomeS isLoggedIn={isLoggedIn} username={username} />
-  )}
-  options={{ title: 'Trang chủ' }}
-/>
+      <Tab.Screen
+        name="Home"
+        children={() => (
+          <HomeS isLoggedIn={isLoggedIn} username={username} />
+        )}
+        options={{ title: 'Trang chủ' }}
+      />
       <Tab.Screen
         name="Event"
         children={() => (
@@ -125,6 +127,21 @@ export default function App() {
             />
           )}
           options={{ headerShown: true, title: 'Đăng ký sự kiện' }}
+        />
+        <Stack.Screen
+          name="PersonalInfo"
+          component={PersonalInfo}
+          options={{ headerShown: true, title: 'Thông tin cá nhân' }}
+        />
+        <Stack.Screen
+          name="ChangePassword"
+          component={ChangePassword}
+          options={{ headerShown: true, title: 'Đổi mật khẩu' }}
+        />
+        <Stack.Screen
+          name="OrderHistory"
+          component={OrderHistory}
+          options={{ headerShown: true, title: 'Lịch sử giao dịch' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
