@@ -335,4 +335,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', borderColor: '#dc3545', borderWidth: 1,
   },
   logoutBtnText: { color: '#dc3545', fontWeight: 'bold', fontSize: 16, marginRight: 10 },
-});2
+});

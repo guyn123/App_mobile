@@ -31,7 +31,7 @@ export default function AccountA({ setIsLoggedIn, setUsername }) {
   const navigation = useNavigation();
 
   // Base URL của backend (thay đổi theo môi trường của bạn)
-  const API_BASE_URL = 'http://172.17.153.233:8084/api/auth'; // Thay bằng địa chỉ backend của bạn
+  const API_BASE_URL = 'http://172.17.154.71:8084/api/auth'; // Thay bằng địa chỉ backend của bạn
 
   const handleLogin = async () => {
     if (!tenDangNhap || !matKhau) {
