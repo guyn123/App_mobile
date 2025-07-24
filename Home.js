@@ -18,7 +18,7 @@ import axios from 'axios';
 export default function HomeS({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
-  const API_BASE = 'http://192.168.62.105:8084/api';
+  const API_BASE = 'http://172.17.154.189:8084/api';
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -179,7 +179,7 @@ export default function HomeS({ isLoggedIn, username }) {
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
                       <TouchableOpacity
                         style={{ backgroundColor: '#007bff', padding: 10, borderRadius: 6, flex: 1, marginRight: 8 }}
-                        onPress={() => navigation.navigate('EventDetail', { event })}
+                        onPress={() => navigation.navigate('EventDetail', { id: event.maSuKien })}
                       >
                         <Text style={{ color: '#fff', textAlign: 'center' }}>Chi tiết</Text>
                       </TouchableOpacity>

@@ -56,22 +56,6 @@ export default function AboutA() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView>
-        {/* Header */}
-        <View style={styles.header}>
-          <Image
-            source={require('./assets/img/banners/original.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm kiếm sự kiện..."
-            placeholderTextColor="#666"
-          />
-          <View style={styles.searchButton}>
-            <Text style={styles.searchButtonText}>Tìm</Text>
-          </View>
-        </View>
 
         {/* Slider */}
         <ScrollView horizontal pagingEnabled style={styles.slider}>
@@ -151,35 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#8ebad3',
-  },
-  logo: {
-    width: 120,
-    height: 50,
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginRight: 10,
-  },
-  searchButton: {
-    backgroundColor: '#005f8d',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
+
   slider: {
     height: 200,
     backgroundColor: '#ccc',

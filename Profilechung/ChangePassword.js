@@ -4,7 +4,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ChangePassword({ setActiveSection }) {
-  const API_BASE = "http://192.168.62.105:8084/api/taikhoan";
+  const API_BASE = "http://172.17.154.189:8084/api/taikhoan";
   const [matKhauCu, setMatKhauCu] = useState("");
   const [matKhauMoi, setMatKhauMoi] = useState("");
   const [matKhauLai, setMatKhauLai] = useState("");

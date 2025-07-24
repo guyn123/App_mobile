@@ -8,17 +8,57 @@ import {
   ScrollView,
   SafeAreaView,
   Linking,
+  Alert,
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import axios from 'axios';
 
 export default function ContactCC() {
   const [tenKhachHang, setTenKhachHang] = useState('');
   const [email, setEmail] = useState('');
   const [noiDungTraLoi, setNoiDungTraLoi] = useState('');
+  const API_BASE = 'http://172.17.154.189:8084/api';
 
-  const handleSend = () => {
-    alert('Cảm ơn bạn đã gửi liên hệ!');
-    // console.log({ tenKhachHang, email, noiDungTraLoi });
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleSend = async () => {
+    // Client-side validation
+    if (!tenKhachHang.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập tên khách hàng.');
+      return;
+    }
+    if (!email.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email.');
+      return;
+    }
+    if (!validateEmail(email)) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email hợp lệ.');
+      return;
+    }
+    if (!noiDungTraLoi.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập nội dung cần hỗ trợ.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_BASE}/ticket/create`, {
+        tenKhachHang,
+        email,
+        noiDung: noiDungTraLoi,
+      });
+      Alert.alert('Thành công', response.data.message || 'Ticket created successfully');
+      // Reset form on success
+      setTenKhachHang('');
+      setEmail('');
+      setNoiDungTraLoi('');
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.';
+      Alert.alert('Lỗi', errorMessage);
+      console.error('Lỗi khi gửi ticket:', error.response?.data || error.message);
+    }
   };
 
   const handleReset = () => {

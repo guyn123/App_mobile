@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function PersonalInfo({ route }) {
   const navigation = useNavigation();
   const { username = "Lê Anh Quân" } = route.params || {};
-  const API_BASE = "http://192.168.62.105:8084/api/taikhoan";
+  const API_BASE = "http://172.17.154.189:8084/api/taikhoan";
   const [token, setToken] = useState("");
   const [originalInfo, setOriginalInfo] = useState({});
   const [hoTen, setHoTen] = useState("");

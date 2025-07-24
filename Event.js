@@ -20,15 +20,17 @@ import axios from 'axios';
 export default function EventE({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
-  const API_BASE = 'http://192.168.62.105:8084/api';
+  const API_BASE = 'http://172.17.154.189:8084/api';
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null); // maDanhMuc or null
+  const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(2000000);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [events, setEvents] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [trangThai, setTrangThai] = useState('Sắp diễn ra'); // Single status or null
+  const [statuses, setStatuses] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const fetchCategories = useCallback(async () => {
@@ -44,6 +46,26 @@ export default function EventE({ isLoggedIn, username }) {
     }
   }, [API_BASE]);
 
+  const fetchStatuses = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/sukien/get/all`, {
+        params: { page: 0, size: 100 },
+      });
+      const events = response.data.content || [];
+      const uniqueStatuses = [...new Set(events.map(event => event.trangThaiSuKien))];
+      const statusOptions = [
+        { value: null, label: 'Tất cả' },
+        ...uniqueStatuses.map(status => ({ value: status, label: status })),
+      ];
+      setStatuses(statusOptions);
+      console.log('Fetched statuses:', statusOptions);
+    } catch (error) {
+      console.error('Lỗi khi lấy trạng thái:', error.response?.data || error.message);
+      Alert.alert('Lỗi', 'Không thể tải danh sách trạng thái.');
+      setStatuses([{ value: null, label: 'Tất cả' }]);
+    }
+  }, [API_BASE]);
+
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
@@ -52,13 +74,11 @@ export default function EventE({ isLoggedIn, username }) {
         size: 20,
         maDanhMuc: selectedCategory || null,
         search: searchKeyword || null,
-        costStart: 0,
+        trangThai: selectedStatus || null,
+        costStart: minPrice,
         costEnd: maxPrice,
       };
-      // Fetch all events, filter by trangThaiSuKien only for Đã kết thúc
-      if (trangThai === 'Đã kết thúc') {
-        params.trangThai = 'Đã kết thúc';
-      }
+
       const response = await axios.get(`${API_BASE}/sukien/get/all`, {
         params,
         paramsSerializer: (params) => {
@@ -71,37 +91,24 @@ export default function EventE({ isLoggedIn, username }) {
           return searchParams.toString();
         },
       });
-      let fetchedEvents = response.data.content || [];
-      
-      // Filter events based on trangThai and date
-      const now = new Date();
-      fetchedEvents = fetchedEvents.filter((event) => {
-        const start = new Date(event.ngayBatDau);
-        const end = new Date(event.ngayKetThuc);
-        if (trangThai === 'Sắp diễn ra') {
-          return now < start && event.trangThaiSuKien !== 'Đã kết thúc';
-        } else if (trangThai === 'Đang diễn ra') {
-          return now >= start && now <= end && event.trangThaiSuKien !== 'Đã kết thúc';
-        } else if (trangThai === 'Đã kết thúc') {
-          return event.trangThaiSuKien === 'Đã kết thúc' || now > end;
-        }
-        return true; // Tất cả
-      });
 
-      console.log('Fetched events:', fetchedEvents); // Debug: Log events
-      console.log('Applied filters:', { selectedCategory, searchKeyword, trangThai, maxPrice }); // Debug: Log filters
+      const fetchedEvents = response.data.content || [];
+      console.log('Fetched events:', fetchedEvents.map(e => e.maSuKien));
+      console.log('Applied filters:', { selectedCategory, searchKeyword, selectedStatus, minPrice, maxPrice });
       setEvents(fetchedEvents);
     } catch (error) {
       console.error('Lỗi khi lấy sự kiện:', error.response?.data || error.message);
       Alert.alert('Lỗi', 'Không thể tải danh sách sự kiện.');
+      setEvents([]);
     } finally {
       setLoading(false);
     }
-  }, [API_BASE, selectedCategory, searchKeyword, trangThai, maxPrice]);
+  }, [API_BASE, selectedCategory, searchKeyword, selectedStatus, minPrice, maxPrice]);
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+    fetchStatuses();
+  }, [fetchCategories, fetchStatuses]);
 
   useEffect(() => {
     fetchEvents();
@@ -111,8 +118,9 @@ export default function EventE({ isLoggedIn, username }) {
     useCallback(() => {
       setSearchKeyword('');
       setSelectedCategory(null);
+      setMinPrice(0);
       setMaxPrice(2000000);
-      setTrangThai('Sắp diễn ra');
+      setSelectedStatus(null);
     }, [])
   );
 
@@ -131,6 +139,7 @@ export default function EventE({ isLoggedIn, username }) {
             placeholderTextColor="#666"
             value={searchKeyword}
             onChangeText={setSearchKeyword}
+            onSubmitEditing={fetchEvents}
           />
           <TouchableOpacity style={styles.searchButton} onPress={fetchEvents}>
             <Text style={styles.searchButtonText}>Tìm</Text>
@@ -161,26 +170,41 @@ export default function EventE({ isLoggedIn, username }) {
           </View>
 
           <Text style={styles.filterTitle}>Lọc theo giá:</Text>
+          <Text>Giá tối thiểu: {minPrice.toLocaleString()}₫</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0}
+            maximumValue={2000000}
+            step={10000}
+            value={minPrice}
+            onValueChange={(value) => {
+              if (value <= maxPrice) setMinPrice(value);
+              else Alert.alert('Lỗi', 'Giá tối thiểu không thể lớn hơn giá tối đa.');
+            }}
+          />
+          <Text>Giá tối đa: {maxPrice.toLocaleString()}₫</Text>
           <Slider
             style={{ width: '100%', height: 40 }}
             minimumValue={0}
             maximumValue={2000000}
             step={10000}
             value={maxPrice}
-            onValueChange={(value) => setMaxPrice(value)}
+            onValueChange={(value) => {
+              if (value >= minPrice) setMaxPrice(value);
+              else Alert.alert('Lỗi', 'Giá tối đa không thể nhỏ hơn giá tối thiểu.');
+            }}
           />
-          <Text>Giá tối đa: {maxPrice.toLocaleString()}₫</Text>
 
           <Text style={styles.filterTitle}>Lọc theo trạng thái:</Text>
           <View style={styles.categoryList}>
-            {['Sắp diễn ra', 'Đang diễn ra', 'Đã kết thúc', 'Tất cả'].map((status) => (
+            {statuses.map((status) => (
               <TouchableOpacity
-                key={status}
-                style={[styles.categoryButton, trangThai === status && styles.categoryButtonActive]}
-                onPress={() => setTrangThai(status)}
+                key={status.value || 'all'}
+                style={[styles.categoryButton, selectedStatus === status.value && styles.categoryButtonActive]}
+                onPress={() => setSelectedStatus(status.value)}
               >
-                <Text style={[styles.categoryText, trangThai === status && styles.categoryTextActive]}>
-                  {status}
+                <Text style={[styles.categoryText, selectedStatus === status.value && styles.categoryTextActive]}>
+                  {status.label}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -189,7 +213,13 @@ export default function EventE({ isLoggedIn, username }) {
 
         <View style={styles.section}>
           {loading ? (
-            <Text style={{ textAlign: 'center', marginTop: 20 }}>Đang tải...</Text>
+            <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 16, color: '#555' }}>
+              Đang tải...
+            </Text>
+          ) : events.length === 0 ? (
+            <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 16, color: '#555' }}>
+              Không có sự kiện nào để hiển thị.
+            </Text>
           ) : (
             <FlatList
               data={events}
@@ -207,7 +237,9 @@ export default function EventE({ isLoggedIn, username }) {
 
                 return (
                   <View style={styles.card}>
-                    <TouchableOpacity onPress={() => setSelectedImage({ uri: `${API_BASE}/sukien/get/img/${item.anhSuKien}` })}>
+                    <TouchableOpacity
+                      onPress={() => setSelectedImage({ uri: `${API_BASE}/sukien/get/img/${item.anhSuKien}` })}
+                    >
                       <Image
                         source={{ uri: `${API_BASE}/sukien/get/img/${item.anhSuKien}` }}
                         style={styles.eventImage}
@@ -222,7 +254,7 @@ export default function EventE({ isLoggedIn, username }) {
                       <View style={styles.eventButtons}>
                         <TouchableOpacity
                           style={styles.detailButton}
-                          onPress={() => navigation.navigate('EventDetail', { event: item })}
+                          onPress={() => navigation.navigate('EventDetail', { id: item.maSuKien })}
                         >
                           <Text style={styles.buttonText}>Chi tiết</Text>
                         </TouchableOpacity>
