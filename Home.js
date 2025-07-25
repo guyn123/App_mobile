@@ -14,11 +14,12 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
+import API_BASE from './src/api';
 
 export default function HomeS({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
-  const API_BASE = 'http://172.17.154.189:8084/api';
+ 
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);

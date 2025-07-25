@@ -30,7 +30,7 @@ export default function AccountA({ setIsLoggedIn, setUsername }) {
   const [resetToken, setResetToken] = useState("");
   const navigation = useNavigation();
 
-  const API_BASE_URL = "http://172.17.154.189:8084/api/auth";
+  const API_BASE_URL = "http://172.20.10.5:8084/api/auth";
 
   // LOGIN
   const handleLogin = async () => {

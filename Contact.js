@@ -12,12 +12,13 @@ import {
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import axios from 'axios';
+import API_BASE from './src/api';
 
 export default function ContactCC() {
   const [tenKhachHang, setTenKhachHang] = useState('');
   const [email, setEmail] = useState('');
   const [noiDungTraLoi, setNoiDungTraLoi] = useState('');
-  const API_BASE = 'http://172.17.154.189:8084/api';
+ 
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

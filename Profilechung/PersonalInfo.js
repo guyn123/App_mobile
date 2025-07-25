@@ -4,11 +4,11 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE from "../src/api"; // Import centralized API base URL
 
 export default function PersonalInfo({ route }) {
   const navigation = useNavigation();
   const { username = "Lê Anh Quân" } = route.params || {};
-  const API_BASE = "http://172.17.154.189:8084/api/taikhoan";
   const [token, setToken] = useState("");
   const [originalInfo, setOriginalInfo] = useState({});
   const [hoTen, setHoTen] = useState("");
@@ -27,7 +27,7 @@ export default function PersonalInfo({ route }) {
   const fetchUserInfo = useCallback(async () => {
     const storedToken = await fetchToken();
     try {
-      const res = await axios.get(`${API_BASE}/me`, {
+      const res = await axios.get(`${API_BASE}/taikhoan/me`, {
         headers: { Cookie: `token=${storedToken}` },
         withCredentials: true,
       });
@@ -72,7 +72,7 @@ export default function PersonalInfo({ route }) {
     }
 
     try {
-      const res = await axios.put(`${API_BASE}/update/me`, updatedData, {
+      const res = await axios.put(`${API_BASE}/taikhoan/update/me`, updatedData, {
         headers: { Cookie: `token=${storedToken}` },
         withCredentials: true,
       });
@@ -112,8 +112,6 @@ export default function PersonalInfo({ route }) {
 
   return (
     <View style={styles.sectionContainer}>
-
-      
       <Input label="Họ và tên" placeholder="Nhập họ tên..." value={hoTen} onChangeText={setHoTen} />
       <Text style={styles.label}>Giới tính</Text>
       <View style={styles.genderRow}>
@@ -143,8 +141,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
- 
-
   formGroup: { marginBottom: 12 },
   label: { fontWeight: "600", fontSize: 17, marginBottom: 6 },
   input: {

@@ -1,16 +1,2 @@
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const api = axios.create({
-  baseURL: 'http://172.17.154.71:8084/api',
-});
-
-api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export default api;
+const API_BASE = 'http://172.20.10.5:8084/api';
+export default API_BASE;

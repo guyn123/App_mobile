@@ -14,12 +14,13 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
+import API_BASE from './src/api';
 
 export default function EventDetail({ username }) {
   const navigation = useNavigation();
   const route = useRoute();
   const { id } = route.params; // Expecting maSuKien as id from navigation
-  const API_BASE = 'http://172.17.154.189:8084/api';
+ 
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);

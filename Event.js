@@ -16,11 +16,11 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import axios from 'axios';
-
+import API_BASE from './src/api';
 export default function EventE({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
-  const API_BASE = 'http://172.17.154.189:8084/api';
+  
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null); // maDanhMuc or null

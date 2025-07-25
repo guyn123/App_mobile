@@ -12,7 +12,7 @@ import ContactCC from './Contact';
 import ProfilePP from './Profilechung/Profile';
 import AccountA from './Account';
 import EventDetail from './EventDetail';
-import DKEvent from './DKEvent';
+import DKEvent from './EventRegister';
 import SplashScreen from './SplashScreen';
 import PersonalInfo from './Profilechung/PersonalInfo';
 import ChangePassword from './Profilechung/ChangePassword';

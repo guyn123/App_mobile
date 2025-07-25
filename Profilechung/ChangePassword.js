@@ -2,9 +2,9 @@ import React, { useState, useCallback } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE from "../src/api"; // Import centralized API base URL
 
 export default function ChangePassword({ setActiveSection }) {
-  const API_BASE = "http://172.17.154.189:8084/api/taikhoan";
   const [matKhauCu, setMatKhauCu] = useState("");
   const [matKhauMoi, setMatKhauMoi] = useState("");
   const [matKhauLai, setMatKhauLai] = useState("");
@@ -29,7 +29,7 @@ export default function ChangePassword({ setActiveSection }) {
     const storedToken = await fetchToken();
     try {
       const res = await axios.put(
-        `${API_BASE}/changepassword`,
+        `${API_BASE}/taikhoan/changepassword`, // Endpoint: /api/taikhoan/changepassword
         {
           oldPassword: matKhauCu,
           newPassword: matKhauMoi,
@@ -47,7 +47,7 @@ export default function ChangePassword({ setActiveSection }) {
     } catch (err) {
       Alert.alert("Lỗi", err.response?.data?.error || "Không đổi được mật khẩu.");
     }
-  }, [fetchToken, API_BASE, matKhauCu, matKhauMoi, matKhauLai]);
+  }, [fetchToken, matKhauCu, matKhauMoi, matKhauLai]);
 
   const Input = useCallback(
     ({ label, placeholder, value, onChangeText, secureTextEntry }) => (
@@ -67,8 +67,6 @@ export default function ChangePassword({ setActiveSection }) {
 
   return (
     <View style={styles.sectionContainer}>
-      
-      
       <Input
         label="Mật khẩu hiện tại"
         placeholder="Nhập mật khẩu hiện tại..."
@@ -109,15 +107,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#007bff",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  
-  
   formGroup: { marginBottom: 12 },
   label: { fontWeight: "600", fontSize: 17, marginBottom: 6 },
   input: {

@@ -5,7 +5,7 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import ThongtinProfile from './Thongtinprofile';
+import ThongtinProfile from './ProfileInformation';
 
 export default function ProfilePP({ username = 'Người dùng', onLogout, externalOrders = [] }) {
   return (
