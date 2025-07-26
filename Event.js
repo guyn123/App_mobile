@@ -17,13 +17,13 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import axios from 'axios';
 import API_BASE from './src/api';
+
 export default function EventE({ isLoggedIn, username }) {
   const navigation = useNavigation();
   const screenWidth = Dimensions.get('window').width;
-  
 
   const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null); // maDanhMuc or null
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(2000000);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -227,7 +227,7 @@ export default function EventE({ isLoggedIn, username }) {
               numColumns={2}
               scrollEnabled={false}
               contentContainerStyle={styles.eventList}
-              columnWrapperStyle={{ justifyContent: 'space-between' }}
+              columnWrapperStyle={styles.columnWrapper} // Sử dụng style mới
               renderItem={({ item }) => {
                 const now = new Date();
                 const start = new Date(item.ngayBatDau);
@@ -246,10 +246,10 @@ export default function EventE({ isLoggedIn, username }) {
                       />
                     </TouchableOpacity>
                     <View style={styles.cardContent}>
-                      <Text style={styles.eventTime}>🕒 {new Date(item.ngayBatDau).toLocaleString('vi-VN')}</Text>
-                      <Text style={styles.eventTime}>🕒 {new Date(item.ngayKetThuc).toLocaleString('vi-VN')}</Text>
-                      <Text style={styles.eventTitle}>{item.tenSuKien}</Text>
-                      <Text style={styles.eventLocation}>📍 {item.diaDiem}</Text>
+                      <Text style={styles.eventTime} numberOfLines={1}>🕒 {new Date(item.ngayBatDau).toLocaleString('vi-VN')}</Text>
+                      <Text style={styles.eventTime} numberOfLines={1}>🕒 {new Date(item.ngayKetThuc).toLocaleString('vi-VN')}</Text>
+                      <Text style={styles.eventTitle} numberOfLines={2}>{item.tenSuKien}</Text>
+                      <Text style={styles.eventLocation} numberOfLines={1}>📍 {item.diaDiem}</Text>
                       <Text style={styles.eventPrice}>{parseInt(item.phiThamGia).toLocaleString()}₫</Text>
                       <View style={styles.eventButtons}>
                         <TouchableOpacity
@@ -376,11 +376,16 @@ const styles = StyleSheet.create({
   eventList: {
     paddingBottom: 12,
   },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
   card: {
     width: (Dimensions.get('window').width - 48) / 2,
-    backgroundColor: '#e5edfb',
+    backgroundColor: '#e5edfbff',
     borderRadius: 8,
     marginBottom: 10,
+    marginHorizontal: 4,
     overflow: 'hidden',
   },
   eventImage: {
@@ -389,46 +394,55 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     padding: 12,
+    flex: 1,
+    justifyContent: 'space-between',
   },
   eventTime: {
     fontSize: 14,
     color: '#444',
+    marginBottom: 4,
   },
   eventTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginVertical: 4,
+    lineHeight: 18,
   },
   eventLocation: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 4,
   },
   eventPrice: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginTop: 10,
     color: '#E91E63',
+    marginVertical: 4,
   },
   eventButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: 8,
+    height: 40,
+    alignItems: 'center',
   },
   detailButton: {
     backgroundColor: '#007bff',
-    paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 8,
+    flex: 1, // Make the button take equal space
+    marginRight: 8, // Add margin to the right for spacing
   },
   registerButton: {
     backgroundColor: '#28a745',
-    paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 8,
+    flex: 1, // Make the button take equal space
   },
   buttonText: {
     fontSize: 14,
     color: '#fff',
+    textAlign: 'center', // Center the text
   },
   imageModalOverlay: {
     flex: 1,

@@ -9,9 +9,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // thêm dòng này đầu file
+import YoutubeIframe from 'react-native-youtube-iframe';
 
 // Màn hình Giới thiệu
 export default function AboutA() {
+  const navigation = useNavigation(); // thêm dòng này trong component
   const teamMembers = [
     {
       name: 'Lê Anh Quân',
@@ -60,7 +63,7 @@ export default function AboutA() {
         {/* Slider */}
         <ScrollView horizontal pagingEnabled style={styles.slider}>
           <Image
-            source={require('./assets/img/nghien-cuu-khoa-hoc-sinh-vien-truong-dai-hoc-cmc-19.jpg')}
+            source={require('./assets/img/bannergioithiru.jpg')}
             style={styles.sliderImage}
           />
         </ScrollView>
@@ -73,9 +76,10 @@ export default function AboutA() {
               <Text style={styles.desc}>
                 Với hơn 12 năm kinh nghiệm tổ chức sự kiện, chúng tôi tự hào đã thực hiện thành công hơn 500 sự kiện lớn nhỏ, từ hội nghị doanh nghiệp, tiệc cưới sang trọng đến các chương trình ra mắt sản phẩm.
               </Text>
-              <TouchableOpacity style={styles.ctaButton}>
-                <Text style={styles.ctaText}>Liên Hệ Ngay</Text>
-              </TouchableOpacity>
+<TouchableOpacity style={styles.ctaButton} onPress={() => navigation.navigate('Contact')}>
+  <Text style={styles.ctaText}>Liên Hệ Ngay</Text>
+</TouchableOpacity>
+
             </View>
 
             <Image
@@ -90,7 +94,16 @@ export default function AboutA() {
             <Text style={styles.stat}>50+ Đối tác</Text>
             <Text style={styles.stat}>98% Hài lòng</Text>
           </View>
+          <View style={styles.videoContainer}>
+  <Text style={styles.sectionTitle}></Text>
+  <YoutubeIframe
+    height={200}
+    play={false}
+    videoId={'1mpVYOFG4YA'} // thay bằng ID thực
+  />
+</View>
         </View>
+
 
         {/* Đội Ngũ */}
         <View style={styles.section}>
@@ -136,15 +149,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
 
-  slider: {
-    height: 200,
-    backgroundColor: '#ccc',
-  },
-  sliderImage: {
-    width: 450,
-    height: 200,
-    resizeMode: 'cover',
-  },
+slider: {
+  height: 225, // Tỷ lệ đúng 2:1 với width 450
+  backgroundColor: '#ccc',
+},
+sliderImage: {
+  width: 450,
+  height: 225,
+  resizeMode: 'contain', // dùng 'contain' để không cắt ảnh
+},
   sectionRow: {
     padding: 40,
     backgroundColor: '#f8f8f8',
@@ -265,4 +278,9 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginBottom: 6,
   },
+  videoContainer: {
+  padding: 0,
+  
+},
+
 });

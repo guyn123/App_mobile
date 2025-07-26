@@ -13,7 +13,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import API_BASE from './src/api';
 export default function AccountA({ setIsLoggedIn, setUsername }) {
   const [activeTab, setActiveTab] = useState("login");
   const [tenDangNhap, setTenDangNhap] = useState("");
@@ -30,7 +30,7 @@ export default function AccountA({ setIsLoggedIn, setUsername }) {
   const [resetToken, setResetToken] = useState("");
   const navigation = useNavigation();
 
-  const API_BASE_URL = "http://172.20.10.5:8084/api/auth";
+  
 
   // LOGIN
   const handleLogin = async () => {
@@ -40,7 +40,7 @@ export default function AccountA({ setIsLoggedIn, setUsername }) {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, {
+      const response = await axios.post(`${API_BASE}/auth/login`, {
         username: tenDangNhap,
         password: matKhau,
       });
@@ -100,7 +100,7 @@ export default function AccountA({ setIsLoggedIn, setUsername }) {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/register`, {
+      const response = await axios.post(`${API_BASE}/auth/register`, {
         username: tenDangNhap,
         password: matKhau,
         confirmPassword: xacNhanMatKhau,
@@ -132,7 +132,7 @@ export default function AccountA({ setIsLoggedIn, setUsername }) {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/forgot_password`, {
+      const response = await axios.post(`${API_BASE}/auth/forgot_password`, {
         identifier: email,
       });
 
@@ -160,7 +160,7 @@ export default function AccountA({ setIsLoggedIn, setUsername }) {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/reset_password/${resetToken}`,
+        `${API_BASE}/auth/reset_password/${resetToken}`,
         {
           newPassword: matKhau,
 

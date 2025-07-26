@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import MapView, { Marker } from 'react-native-maps';
 import axios from 'axios';
 import API_BASE from './src/api';
 
@@ -18,7 +19,6 @@ export default function ContactCC() {
   const [tenKhachHang, setTenKhachHang] = useState('');
   const [email, setEmail] = useState('');
   const [noiDungTraLoi, setNoiDungTraLoi] = useState('');
- 
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,7 +26,6 @@ export default function ContactCC() {
   };
 
   const handleSend = async () => {
-    // Client-side validation
     if (!tenKhachHang.trim()) {
       Alert.alert('Lỗi', 'Vui lòng nhập tên khách hàng.');
       return;
@@ -50,15 +49,14 @@ export default function ContactCC() {
         email,
         noiDung: noiDungTraLoi,
       });
-      Alert.alert('Thành công', response.data.message || 'Ticket created successfully');
-      // Reset form on success
+      Alert.alert('Thành công', response.data.message || 'Đã gửi liên hệ thành công');
       setTenKhachHang('');
       setEmail('');
       setNoiDungTraLoi('');
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.';
+      const errorMessage = error.response?.data?.error || 'Không thể gửi yêu cầu. Vui lòng thử lại sau.';
       Alert.alert('Lỗi', errorMessage);
-      console.error('Lỗi khi gửi ticket:', error.response?.data || error.message);
+      console.error('Lỗi gửi ticket:', error);
     }
   };
 
@@ -93,9 +91,7 @@ export default function ContactCC() {
             multiline={true}
           />
 
-          <Text style={styles.note}>
-            (*): là các trường bắt buộc. Xin vui lòng điền đầy đủ thông tin.
-          </Text>
+          <Text style={styles.note}>(*): là các trường bắt buộc. Xin vui lòng điền đầy đủ thông tin.</Text>
 
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.submitBtn} onPress={handleSend}>
@@ -107,13 +103,28 @@ export default function ContactCC() {
           </View>
         </View>
 
-        {/* Map */}
+        {/* Bản đồ tích hợp */}
         <View style={styles.mapContainer}>
           <Text style={styles.mapTitle}>TRUNG TÂM SỰ KIỆN N3</Text>
           <Text style={styles.mapAddress}>
             372B P. Xã Đàn, Nam Đồng, Đống Đa, Hà Nội 100000
           </Text>
-          <Text
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: 21.017346,
+              longitude: 105.829918,
+              latitudeDelta: 0.005,
+              longitudeDelta: 0.005,
+            }}
+          >
+            <Marker
+              coordinate={{ latitude: 21.017346, longitude: 105.829918 }}
+              title="Trung Tâm Sự Kiện N3"
+              description="372B Xã Đàn, Đống Đa, Hà Nội"
+            />
+          </MapView>
+           <Text
             style={styles.mapLink}
             onPress={() =>
               Linking.openURL('https://www.google.com/maps?q=21.017346,105.829918&z=16')
@@ -237,7 +248,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   submitBtn: {
-    backgroundColor: '#c49b33',
+    backgroundColor: '#5291b3ff',
     flex: 1,
     padding: 12,
     borderRadius: 6,
@@ -259,6 +270,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     elevation: 1,
+    marginBottom: 30,
   },
   mapTitle: {
     fontWeight: 'bold',
@@ -269,9 +281,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  mapLink: {
-    color: '#1a73e8',
-    marginTop: 8,
-    fontSize: 14,
+  map: {
+    width: '100%',
+    height: 200,
+    marginTop: 10,
+    borderRadius: 8,
   },
+
 });

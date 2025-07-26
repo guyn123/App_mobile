@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, ScrollView, Alert, TouchableOpacity } fr
 import { useRoute, useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import API_BASE from './src/api';
+import API_BASE from '../src/api';
 import Pay from './Pay';
 import Ticket from './Ticket';
 import { Linking } from "react-native";
